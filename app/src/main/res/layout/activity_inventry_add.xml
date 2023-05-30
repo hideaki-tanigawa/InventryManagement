@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="16dp"
+    android:paddingTop="16dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="16dp"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".InventryAdd">
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/commodityImageText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:text="@string/add_image_view_label"
+                android:textSize="24sp"/>
+
+            <ImageView
+                android:id="@+id/commodityImage"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_below="@+id/commodityImageText"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:background="#d3d3d3"
+                android:contentDescription="@string/image_view_label" />
+
+            <EditText
+                android:id="@+id/commodityNameEdit"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_below="@+id/commodityImage"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="16dp"
+                android:autofillHints="@string/add_commodity_hint"
+                android:hint="@string/add_commodity_hint"
+                android:gravity="top"
+                android:inputType="text"
+                tools:ignore="DuplicateSpeakableTextCheck,LabelFor,SpeakableTextPresentCheck,VisualLintTextFieldSize" />
+
+            <LinearLayout
+                android:id="@+id/commodityCountLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/commodityNameEdit"
+                android:layout_marginTop="16dp">
+
+                <TextView
+                    android:id="@+id/commodityCountText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/add_commodity_count"
+                    android:textSize="24sp"/>
+
+                <LinearLayout
+                    android:id="@+id/commodityCountNumberLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right">
+
+                    <EditText
+                        android:id="@+id/commodityCountEdit"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginRight="16dp"
+                        android:inputType="numberDecimal"/>
+
+                    <TextView
+                        android:id="@+id/commodityCountNumberText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginRight="24dp"
+                        android:textSize="16sp"
+                        android:text="@string/add_commodity_count_Number" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/commodityPriceLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/commodityCountLayout"
+                android:layout_marginTop="16dp">
+
+                <TextView
+                    android:id="@+id/commodityPriceText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/add_commodity_price"
+                    android:textSize="24sp"/>
+
+                <LinearLayout
+                    android:id="@+id/commodityPriceNumberLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right">
+
+                    <EditText
+                        android:id="@+id/commodityPriceEdit"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginRight="16dp"
+                        android:inputType="numberDecimal"/>
+
+                    <TextView
+                        android:id="@+id/commodityPriceNumberText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginRight="24dp"
+                        android:textSize="16sp"
+                        android:text="@string/add_commodity_price_number" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/commodityGenreText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/commodityPriceLayout"
+                android:layout_marginTop="16dp"
+                android:text="@string/add_commodity_genre"
+                android:textSize="24sp"/>
+
+
+            <EditText
+                android:id="@+id/commodityGenreEdit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/commodityPriceLayout"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="8dp"
+                android:autofillHints="@string/add_commodity_genre_case"
+                android:hint="@string/add_commodity_genre_case"
+                android:inputType="text"
+                android:maxLength="30"
+                tools:ignore="LabelFor,SpeakableTextPresentCheck,VisualLintTextFieldSize" />
+
+            <TextView
+                android:id="@+id/commodityConsumptionDateText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/commodityGenreEdit"
+                android:layout_marginTop="16dp"
+                android:text="@string/add_commodity_spending"
+                android:textSize="24sp"/>
+
+            <LinearLayout
+                android:id="@+id/commodityConsumptionDateLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/commodityConsumptionDateText"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/commodityDateText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/add_commodity_date"
+                    android:textSize="18sp"/>
+
+                <LinearLayout
+                    android:id="@+id/dateButtonLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right">
+
+                    <Button
+                        android:id="@+id/dateButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="24dp"
+                        android:text="@string/add_commodity_date_change_button" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/commodityPlaceText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/commodityConsumptionDateLayout"
+                android:layout_marginTop="16dp"
+                android:text="@string/add_commodity_place"
+                android:textSize="24sp"/>
+
+
+            <EditText
+                android:id="@+id/commodityPlaceEdit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/commodityPlaceText"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="8dp"
+                android:autofillHints="@string/add_commodity_place_case"
+                android:hint="@string/add_commodity_place_case"
+                android:inputType="text"
+                android:maxLength="30"
+                tools:ignore="LabelFor,SpeakableTextPresentCheck,VisualLintTextFieldSize" />
+
+            <Button
+                android:id="@+id/commodityAddButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_below="@+id/commodityPlaceEdit"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="32dp"
+                android:background="@drawable/custom_button"
+                android:text="@string/send_button_label"
+                android:textColor="@color/white"
+                tools:ignore="TextContrastCheck,VisualLintButtonSize" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/commodityAddButton"
+                android:layout_centerInParent="true"
+                android:visibility="gone" />
+
+        </LinearLayout>
+    </ScrollView>
+</RelativeLayout>
