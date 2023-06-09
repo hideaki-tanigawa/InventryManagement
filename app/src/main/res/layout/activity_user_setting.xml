@@ -10,6 +10,25 @@
     android:paddingBottom="16dp"
     tools:context=".UserSettingActivity">
 
+    <EditText
+        android:id="@+id/userNameText"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:autofillHints="@string/change_name_hint"
+        android:hint="@string/change_name_hint"
+        android:inputType="text"
+        tools:ignore="VisualLintTextFieldSize" />
+
+    <Button
+        android:id="@+id/userNameChangeButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/custom_button"
+        android:text="@string/menu_change_button_label"
+        android:textColor="@color/white"
+        tools:ignore="TextContrastCheck,VisualLintButtonSize" />
+
     <Button
         android:id="@+id/logoutButton"
         android:layout_width="match_parent"

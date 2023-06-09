@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navi_person"
+        android:icon="@drawable/baseline_person"
+        android:title="@string/bottom_navigation_person"/>
+    <item
+        android:id="@+id/navi_group"
+        android:icon="@drawable/ic_inventry_group"
+        android:title="@string/bottom_navigation_group"/>
+    <item
+        android:id="@+id/navi_shop"
+        android:icon="@drawable/ic_shopping_list"
+        android:title="@string/bottom_navigation_shopping"/>
+</menu>

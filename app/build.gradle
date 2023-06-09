@@ -39,8 +39,7 @@ android {
 }
 
 dependencies {
-
-    /* 追加:ここから */
+    implementation("androidx.activity:activity-ktx:1.6.1")
     // Realm
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
     implementation 'io.realm.kotlin:library-base:1.5.0'
@@ -57,6 +56,13 @@ dependencies {
     // Picasso (画像ライブラリ)
     implementation 'com.squareup.picasso:picasso:2.8'
     /* 追加:ここまで */
+
+    /* BottomNavigationの追加 */
+    implementation "com.google.android.material:material:1.1.0-alpha06"
+    // Navigationを使うため
+    def nav_version = '2.0.0'
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
     implementation platform('com.google.firebase:firebase-bom:31.2.3')
     implementation 'com.google.firebase:firebase-auth'

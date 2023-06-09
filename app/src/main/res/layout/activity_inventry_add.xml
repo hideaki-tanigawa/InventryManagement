@@ -203,6 +203,7 @@
                 </LinearLayout>
             </LinearLayout>
 
+
             <TextView
                 android:id="@+id/commodityPlaceText"
                 android:layout_width="wrap_content"
@@ -210,8 +211,7 @@
                 android:layout_below="@+id/commodityConsumptionDateLayout"
                 android:layout_marginTop="16dp"
                 android:text="@string/add_commodity_place"
-                android:textSize="24sp"/>
-
+                android:textSize="24sp" />
 
             <EditText
                 android:id="@+id/commodityPlaceEdit"
@@ -225,6 +225,24 @@
                 android:inputType="text"
                 android:maxLength="30"
                 tools:ignore="LabelFor,SpeakableTextPresentCheck,VisualLintTextFieldSize" />
+
+            <TextView
+                android:id="@+id/noticeTimingText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/commodityPlaceEdit"
+                android:layout_marginTop="16dp"
+                android:text="通知タイミング"
+                android:textSize="24sp"/>
+
+            <Spinner
+                android:id="@+id/noticeTimingSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:spinnerMode="dialog"
+                android:layout_below="@+id/noticeTimingText"
+                android:layout_marginTop="8dp"
+                tools:ignore="VisualLintButtonSize"/>
 
             <Button
                 android:id="@+id/commodityAddButton"

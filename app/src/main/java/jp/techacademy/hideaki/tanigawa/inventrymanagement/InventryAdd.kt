@@ -2,6 +2,7 @@ package jp.techacademy.hideaki.tanigawa.inventrymanagement
 
 import android.Manifest
 import android.app.Activity
+import android.app.DatePickerDialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -18,15 +19,18 @@ import android.provider.MediaStore
 import android.util.Base64
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ActivityInventryAddBinding
 import java.io.ByteArrayOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.HashMap
 
 class InventryAdd : AppCompatActivity(), View.OnClickListener,
     DatabaseReference.CompletionListener {
@@ -36,6 +40,8 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
 
     private lateinit var binding: ActivityInventryAddBinding
     private var pictureUri: Uri? = null
+    private var calendar = Calendar.getInstance()
+    private var noticeId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +52,25 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
         title = getString(R.string.inventry_send_title)
         binding.commodityAddButton.setOnClickListener(this)
         binding.commodityImage.setOnClickListener(this)
+        binding.dateButton.setOnClickListener(this)
+
+        // Spinnerの表示
+        val spinner = findViewById<Spinner>(R.id.noticeTimingSpinner)
+        val adapter = ArrayAdapter.createFromResource(this, R.array.notice_time_array,android.R.layout.simple_spinner_item)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+
+        // OnItemSelectedListenerの実装
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            // 項目が選択された時に呼ばれる
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val spinnerId = parent?.selectedItemId
+                noticeId = spinnerId!!.toString()
+            }
+
+            // 基本的には呼ばれないが、何らかの理由で選択されることなく項目が閉じられたら呼ばれる
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
     }
 
     /**
@@ -123,60 +148,34 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
             im.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS)
 
             val dataBaseReference = FirebaseDatabase.getInstance().reference
-            val genreRef = dataBaseReference.child(InventriesPATH)
 
-            val data = HashMap<String, String>()
+            val userID = FirebaseAuth.getInstance().currentUser!!.uid
+            val userRef = dataBaseReference.child(UsersPATH).child(userID)
+            userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val data = snapshot.value as Map<*, *>?
+                    val data2 = data!!["groupID"] as Map<*,*>
+                    registerInventryInfo(data2!!["person"].toString(), userID)
+                }
 
-            // UID
-            data["uid"] = FirebaseAuth.getInstance().currentUser!!.uid
-
-            // タイトルと本文を取得する
-            val title = binding.commodityNameEdit.text.toString()
-            val price = binding.commodityPriceEdit.text.toString()
-            val count = binding.commodityCountEdit.text.toString()
-            val genre = binding.commodityGenreEdit.text.toString()
-            val place = binding.commodityPlaceEdit.text.toString()
-            val date = "2023/05/30"
-
-            if (title.isEmpty()) {
-                // タイトルが入力されていない時はエラーを表示するだけ
-                Snackbar.make(v, getString(R.string.input_title), Snackbar.LENGTH_LONG).show()
-                return
-            }
-
-            if (price.isEmpty()) {
-                // 質問が入力されていない時はエラーを表示するだけ
-                Snackbar.make(v, getString(R.string.price_message), Snackbar.LENGTH_LONG).show()
-                return
-            }
-
-            // Preferenceから名前を取る
-            val sp = PreferenceManager.getDefaultSharedPreferences(this)
-            val name = sp.getString(NameKEY, "")
-
-            data["commodity"] = title
-            data["price"] = price
-            data["count"] = count
-            data["genre"] = genre
-            data["place"] = place
-            data["date"] = date
-
-            // 添付画像を取得する
-            val drawable = binding.commodityImage.drawable as? BitmapDrawable
-
-            // 添付画像が設定されていれば画像を取り出してBASE64エンコードする
-            if (drawable != null) {
-                val bitmap = drawable.bitmap
-                val byteArrayOutputStream = ByteArrayOutputStream()
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream)
-                val bitmapString =
-                    Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT)
-
-                data["image"] = bitmapString
-            }
-
-            genreRef.push().setValue(data, this)
-            binding.progressBar.visibility = View.VISIBLE
+                override fun onCancelled(firebaseError: DatabaseError) {}
+            })
+        } else if (v === binding.dateButton) {
+            // 日付ダイアログを表示する
+            /**
+             * 日付選択ボタン
+             */
+            val datePickerDialog = DatePickerDialog(
+                this,
+                { _, year, month, day ->
+                    calendar.set(year, month, day)
+                    setDateTimeButtonText()
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            )
+            datePickerDialog.show()
         }
     }
 
@@ -235,5 +234,92 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
                 Snackbar.LENGTH_LONG
             ).show()
         }
+    }
+
+    /**
+     * Firebaseから特定のuserが保持しているgroupIDを取得する
+     * param uesrID:String
+     * return groupID:String
+     */
+    private fun getUserGroupID(userID: String): String {
+        var groupID = ""
+        val dataBaseReference = FirebaseDatabase.getInstance().reference
+        val userRef = dataBaseReference.child(UsersPATH).child(userID)
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val data = snapshot.value as Map<*, *>?
+                groupID = data!!["groupID"].toString()
+            }
+
+            override fun onCancelled(firebaseError: DatabaseError) {}
+        })
+        return groupID
+    }
+
+    /**
+     * Firebaseに登録する処理
+     */
+    private fun registerInventryInfo(groupID: String, userID: String){
+        val dataBaseReference = FirebaseDatabase.getInstance().reference
+
+        val data = HashMap<String, String>()
+        val genreRef = dataBaseReference.child(InventriesPATH).child(groupID)
+
+        // UID
+        data["uid"] = userID
+
+        // タイトルと本文を取得する
+        val title = binding.commodityNameEdit.text.toString()
+        val price = binding.commodityPriceEdit.text.toString()
+        val count = binding.commodityCountEdit.text.toString()
+        val genre = binding.commodityGenreEdit.text.toString()
+        val place = binding.commodityPlaceEdit.text.toString()
+        val notice = noticeId
+        val date = binding.commodityDateText.text.toString()
+
+        if (title.isEmpty()) {
+            // タイトルが入力されていない時はエラーを表示するだけ
+            Snackbar.make(binding.commodityAddButton, getString(R.string.input_title), Snackbar.LENGTH_LONG).show()
+            return
+        }
+
+        if (price.isEmpty()) {
+            // 質問が入力されていない時はエラーを表示するだけ
+            Snackbar.make(binding.commodityAddButton, getString(R.string.price_message), Snackbar.LENGTH_LONG).show()
+            return
+        }
+
+        data["commodity"] = title
+        data["price"] = price
+        data["count"] = count
+        data["genre"] = genre
+        data["place"] = place
+        data["date"] = date
+        data["notice"] = notice
+
+        // 添付画像を取得する
+        val drawable = binding.commodityImage.drawable as? BitmapDrawable
+
+        // 添付画像が設定されていれば画像を取り出してBASE64エンコードする
+        if (drawable != null) {
+            val bitmap = drawable.bitmap
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream)
+            val bitmapString =
+                Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT)
+
+            data["image"] = bitmapString
+        }
+
+        genreRef.push().setValue(data, this)
+        binding.progressBar.visibility = View.VISIBLE
+    }
+
+    /**
+     * 日付と時刻のボタンの表示を設定する
+     */
+    private fun setDateTimeButtonText() {
+        val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.JAPANESE)
+        binding.commodityDateText.text = dateFormat.format(calendar.time)
     }
 }

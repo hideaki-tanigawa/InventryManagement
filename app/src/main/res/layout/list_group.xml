@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/groupNameText"
+        android:layout_width="0dp"
+        android:layout_height="90dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/list_group_name"
+        android:textSize="25sp"
+        android:gravity="center_vertical"
+        app:layout_constraintEnd_toStartOf="@+id/groupMemberCount"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintHorizontal_weight="2.8"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/groupMemberCount"
+        android:layout_width="0dp"
+        android:layout_height="90dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/group_member_count"
+        android:textSize="48sp"
+        android:gravity="center_vertical|right"
+        app:layout_constraintEnd_toStartOf="@+id/groupMemberCountNumber"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_weight="0.6"
+        app:layout_constraintStart_toEndOf="@+id/groupNameText"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/groupMemberCountNumber"
+        android:layout_width="0dp"
+        android:layout_height="90dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/group_member_count_number"
+        android:textSize="25sp"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_weight="0.6"
+        app:layout_constraintStart_toEndOf="@+id/groupMemberCount"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

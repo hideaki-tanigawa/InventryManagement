@@ -12,6 +12,8 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ActivityLoginBinding
+import java.util.*
+import kotlin.collections.HashMap
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -64,14 +66,23 @@ class LoginActivity : AppCompatActivity() {
                 // 成功した場合
                 val user = auth.currentUser
                 val userRef = databaseReference.child(UsersPATH).child(user!!.uid)
+                var uuid = UUID.randomUUID().toString()
+                uuid = uuid.replace("-", "")
+                val invRef = databaseReference.child(InventriesPATH).child(uuid).child("member")
+                val groupRef = databaseReference.child(UsersPATH).child(user!!.uid).child("groupID")
 
                 if (isCreateAccount) {
                     // アカウント作成の時は表示名をFirebaseに保存する
                     val name = binding.nameText.text.toString()
-
                     val data = HashMap<String, String>()
+                    val data2 = HashMap<String, String>()
+                    val invData = HashMap<String, String>()
                     data["name"] = name
                     userRef.setValue(data)
+                    data2["person"] = uuid
+                    groupRef.setValue(data2)
+                    invData["master"] = user!!.uid
+                    invRef.setValue(invData)
 
                     // 表示名をPreferenceに保存する
                     saveName(name)

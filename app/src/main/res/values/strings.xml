@@ -3,8 +3,11 @@
     <string name="action_settings">Settings</string>
     <string name="image_view_label">添付画像</string>
     <string name="title_label">在庫タイトル</string>
-    <string name="consumption_date">期限日時</string>
-    <string name="inventry_count">0</string>
+    <string name="consumption_unit_date">日</string>
+    <string name="consumption_date">15</string>
+    <string name="inventry_residue">あと</string>
+    <string name="inventry_count">12</string>
+    <string name="inventry_unit">コ</string>
     <!-- ログイン画面用文字列 -->
     <string name="login_email_hint">メールアドレス</string>
     <string name="login_pass_hint">パスワード（6文字以上）</string>
@@ -16,14 +19,19 @@
     <string name="login_error_message">正しく入力してください</string>
     <!-- ドロワー・メニュー用文字列 -->
     <string name="screen_select_label">画面選択</string>
-    <string name="menu_inventry_label">在庫リスト</string>
+    <string name="menu_inventry_list_label">在庫一覧</string>
     <string name="menu_shopping_label">買い物リスト</string>
-    <string name="menu_foodstuff_label">食品</string>
-    <string name="menu_commodity_label">日用品</string>
+    <string name="menu_group_list_label">グループ一覧</string>
+    <string name="menu_user_management_label">ユーザー管理</string>
+    <string name="menu_group_notice_label">通知</string>
+    <string name="menu_group_member_add_label">グループメンバー追加</string>
     <!-- 設定画面用文字列 -->
-    <string name="settings_title">ユーザー管理</string>
+    <string name="settings_title">設定</string>
+    <string name="change_name_hint">表示名</string>
+    <string name="menu_change_button_label">変更</string>
     <string name="menu_logout_label">ログアウト</string>
     <string name="no_login_user">ログインしていません</string>
+    <string name="change_display_name">表示名を変更しました</string>
     <string name="logout_complete_message">ログアウトしました</string>
     <!-- 質問投稿画面用文字列 -->
     <string name="add_commodity_hint">商品名を入力して下さい</string>
@@ -46,4 +54,19 @@
     <string name="get_image">画像を取得</string>
     <string name="inventry_no_select_screen">画面が指定されておりません</string>
     <string name="inventry_send_error_message">在庫を作成できませんでした</string>
+    <!-- ボトムナビゲーション用文字列 -->
+    <string name="bottom_navigation_person">個人</string>
+    <string name="bottom_navigation_group">グループ</string>
+    <string name="bottom_navigation_shopping">買い物</string>
+    <!-- 通知タイミング用の文字列 -->
+    <string-array name="notice_time_array">
+        <item>個数が減る度に通知する</item>
+        <item>個数が残り1個になると通知する</item>
+        <item>個数が残り2個になると通知する</item>
+        <item>個数が残り3個になると通知する</item>
+    </string-array>
+    <!-- グループ一覧用の文字列 -->
+    <string name="list_group_name">グループ名</string>
+    <string name="group_member_count">4</string>
+    <string name="group_member_count_number">人</string>
 </resources>

@@ -2,16 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_inventry"
-            android:title="@string/menu_inventry_label" />
+            android:id="@+id/nav_user_management"
+            android:title="@string/menu_user_management_label" />
         <item
-            android:id="@+id/nav_shopping"
-            android:title="@string/menu_shopping_label" />
-        <item
-            android:id="@+id/nav_foodstuff"
-            android:title="@string/menu_foodstuff_label" />
-        <item
-            android:id="@+id/nav_commodity"
-            android:title="@string/menu_commodity_label" />
+            android:id="@+id/nav_group_notice"
+            android:title="@string/menu_group_notice_label" />
     </group>
 </menu>
