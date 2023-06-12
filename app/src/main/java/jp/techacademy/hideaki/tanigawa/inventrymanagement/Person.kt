@@ -63,6 +63,7 @@ class Person : Fragment() {
                 startActivity(intent)
             } else {
                 val intent = Intent(context, InventryAdd::class.java)
+                intent.putExtra("groupIdKind","person")
                 startActivity(intent)
             }
         }
@@ -110,7 +111,12 @@ class Person : Fragment() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val data = snapshot.value as Map<*, *>?
                     val data2 = data!!.get("groupID") as Map<*,*>
-                    displayInventryListInfo(data2["person"].toString())
+                    for(key in data2.keys){
+                        val kindName = data2[key] as? String?: ""
+                        if(kindName.equals("person")){
+                            displayInventryListInfo(key.toString())
+                        }
+                    }
                 }
 
                 override fun onCancelled(firebaseError: DatabaseError) {}
@@ -182,7 +188,7 @@ class Person : Fragment() {
                 inventryArrayList.add(inventry)
                 adapter.notifyDataSetChanged()
 
-                binding.listView.setOnItemClickListener{ _, _, position, _ ->
+                binding.listView.setOnItemClickListener{ parent, _, position, _ ->
                     // Inventryのインスタンスを渡して質問詳細画面を起動する
                     val intent = Intent(context, InventryAdd::class.java)
                     intent.putExtra("inventry", inventryArrayList[position])
@@ -202,12 +208,17 @@ class Person : Fragment() {
                     builder.setPositiveButton("OK") {_, _ ->
                         val userID = FirebaseAuth.getInstance().currentUser!!.uid
                         val userRef = databaseReference.child(UsersPATH).child(userID)
-                        val inventryId = snapshot.key ?: ""
+                        val inventryId = inventryArrayList[position].inventryUid
                         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
                             override fun onDataChange(snapshot: DataSnapshot) {
                                 val data = snapshot.value as Map<*, *>?
                                 val data2 = data!!["groupID"] as Map<*,*>
-                                deleteInventryListInfo(data2!!["person"].toString(), inventryId)
+                                for(key in data2.keys){
+                                    val kindName = data2[key] as? String?: ""
+                                    if(kindName.equals("person")){
+                                        deleteInventryListInfo(key.toString(), inventryId)
+                                    }
+                                }
                             }
 
                             override fun onCancelled(firebaseError: DatabaseError) {}

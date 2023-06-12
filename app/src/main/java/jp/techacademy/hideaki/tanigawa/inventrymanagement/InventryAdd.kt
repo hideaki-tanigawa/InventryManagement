@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Base64
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
@@ -39,20 +40,50 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
     }
 
     private lateinit var binding: ActivityInventryAddBinding
+    private lateinit var inventry: Inventry
+    private var moveBoolean: Boolean = false
     private var pictureUri: Uri? = null
     private var calendar = Calendar.getInstance()
     private var noticeId: String = ""
+    private var groupKindName: String = ""
+    private var noticeNo = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityInventryAddBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // 渡ってきたQuestionのオブジェクトを保持する
+        // API33以上でgetSerializableExtra(key)が非推奨となったため処理を分岐
+        try {
+            @Suppress("UNCHECKED_CAST", "DEPRECATION", "DEPRECATED_SYNTAX_WITH_DEFINITELY_NOT_NULL")
+            inventry = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                intent.getSerializableExtra("inventry", Inventry::class.java)!!
+            else
+                (intent.getSerializableExtra("inventry") as? Inventry)!!
+
+            moveBoolean = true
+        }catch (e: NullPointerException){
+            moveBoolean = false
+        }
+
         // UIの準備
         title = getString(R.string.inventry_send_title)
         binding.commodityAddButton.setOnClickListener(this)
         binding.commodityImage.setOnClickListener(this)
         binding.dateButton.setOnClickListener(this)
+
+        // 在庫作成画面の要素に値を代入する
+        if(moveBoolean){
+            assignmentValue(inventry)
+        }
+
+        // Intentで送られてきた値の取得
+        groupKindName = intent.getStringExtra("groupIdKind").toString()
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         // Spinnerの表示
         val spinner = findViewById<Spinner>(R.id.noticeTimingSpinner)
@@ -71,6 +102,7 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
             // 基本的には呼ばれないが、何らかの理由で選択されることなく項目が閉じられたら呼ばれる
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+        spinner.setSelection(noticeNo)
     }
 
     /**
@@ -155,7 +187,12 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val data = snapshot.value as Map<*, *>?
                     val data2 = data!!["groupID"] as Map<*,*>
-                    registerInventryInfo(data2!!["person"].toString(), userID)
+                    for(key in data2.keys){
+                        val kindName = data2[key] as? String?: ""
+                        if(kindName.equals(groupKindName)){
+                            registerInventryInfo(key.toString(), userID)
+                        }
+                    }
                 }
 
                 override fun onCancelled(firebaseError: DatabaseError) {}
@@ -237,26 +274,6 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
     }
 
     /**
-     * Firebaseから特定のuserが保持しているgroupIDを取得する
-     * param uesrID:String
-     * return groupID:String
-     */
-    private fun getUserGroupID(userID: String): String {
-        var groupID = ""
-        val dataBaseReference = FirebaseDatabase.getInstance().reference
-        val userRef = dataBaseReference.child(UsersPATH).child(userID)
-        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val data = snapshot.value as Map<*, *>?
-                groupID = data!!["groupID"].toString()
-            }
-
-            override fun onCancelled(firebaseError: DatabaseError) {}
-        })
-        return groupID
-    }
-
-    /**
      * Firebaseに登録する処理
      */
     private fun registerInventryInfo(groupID: String, userID: String){
@@ -321,5 +338,31 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
     private fun setDateTimeButtonText() {
         val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.JAPANESE)
         binding.commodityDateText.text = dateFormat.format(calendar.time)
+    }
+
+    /**
+     * 要素を代入する処理
+     */
+    private fun assignmentValue(inventry: Inventry){
+        Log.d("TWWWW","1234567898765432")
+        val bytes = inventry.imageBytes
+        if (bytes.isNotEmpty()) {
+            val image = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                .copy(Bitmap.Config.ARGB_8888, true)
+            binding.commodityImage.setImageBitmap(image)
+        }
+
+        binding.commodityNameEdit.setText(inventry.commodity)
+        binding.commodityCountEdit.setText(inventry.count)
+        binding.commodityPriceEdit.setText(inventry.price)
+        binding.commodityGenreEdit.setText(inventry.genre)
+        binding.commodityPlaceEdit.setText(inventry.place)
+        noticeNo = inventry.notice.toInt()
+
+        // 在庫の日付をcalendarに反映
+        val simpleDateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.JAPANESE)
+        calendar.time = simpleDateFormat.parse(inventry.date) as Date
+
+        setDateTimeButtonText()
     }
 }

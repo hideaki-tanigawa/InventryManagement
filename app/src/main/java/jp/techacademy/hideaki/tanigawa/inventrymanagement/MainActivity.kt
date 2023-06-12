@@ -111,4 +111,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             return false
         }
     }
+
+    /**
+     * Fragmentのアクションバーのタイトルの変えための関数
+     */
+    public fun setActionBarTitle(titles: String){
+        title = titles
+    }
 }

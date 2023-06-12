@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.GroupMainBinding
 import java.util.*
+import android.util.Base64
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
@@ -28,7 +29,7 @@ class Group:Fragment() {
     private lateinit var groupName:String
     private var groupCount:Int = 1
     private var users:Boolean = true
-    private var visibleView = 0
+    private var groupKindName = ""
 
     private lateinit var databaseReference: DatabaseReference
     private lateinit var groupArrayList: ArrayList<GroupList>
@@ -43,7 +44,8 @@ class Group:Fragment() {
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
             val groupValue = snapshot.value.toString()
             if(!groupValue.equals("person")){
-                val groupID = snapshot.key.toString()
+                val groupID = snapshot.key as? String?: ""
+                val groupKindName = snapshot.value as? String?: ""
                 databaseReference = FirebaseDatabase.getInstance().reference
                 groupListRef = databaseReference.child(InventriesPATH).child(groupID)
                 groupListRef.addListenerForSingleValueEvent(object : ValueEventListener{
@@ -58,17 +60,12 @@ class Group:Fragment() {
                         }
 
                         val groupList = GroupList(
-                            groupName, memberCount
+                            groupID, groupName, groupKindName, memberCount
                         )
                         groupArrayList.add(groupList)
                         adapter.notifyDataSetChanged()
 
                         groupCount++
-
-                        // グループリストがタップされた時に発火
-                        binding.groupListView.setOnItemClickListener{ _, _, position, _ ->
-                            val groupInvRef = databaseReference.child(InventriesPATH).child(groupID)
-                        }
                     }
                     override fun onCancelled(error: DatabaseError) {
                         TODO("Not yet implemented")
@@ -100,11 +97,6 @@ class Group:Fragment() {
         // Firebase
         databaseReference = FirebaseDatabase.getInstance().reference
 
-        if(visibleView == 0){
-            // fabの表示非表示
-            binding.groupFab.visibility = View.GONE
-        }
-
         // fabが押された時の処理
         binding.groupFab.setOnClickListener {
             if (users) {
@@ -112,6 +104,7 @@ class Group:Fragment() {
                 startActivity(intent)
             } else {
                 val intent = Intent(context, InventryAdd::class.java)
+                intent.putExtra("groupIdKind", groupKindName)
                 startActivity(intent)
             }
         }
@@ -179,14 +172,23 @@ class Group:Fragment() {
         groupArrayList = ArrayList()
         adapter.setGroupArrayList(groupArrayList)
         adapter.notifyDataSetChanged()
+
+        // グループ在庫リストのListViewの準備
+        invAdapter = InventryListAdapter(requireContext())
+        binding.groupListView.adapter = invAdapter
+        groupInventryArrayList = ArrayList()
+        invAdapter.setInventryArrayList(groupInventryArrayList)
+        invAdapter.notifyDataSetChanged()
     }
 
     override fun onResume() {
         super.onResume()
+        binding.groupFab.visibility = View.GONE
 
         users = getLoginBoolean()
 
         groupArrayList.clear()
+        groupInventryArrayList.clear()
         adapter.setGroupArrayList(groupArrayList)
         binding.groupListView.adapter = adapter
 
@@ -194,6 +196,20 @@ class Group:Fragment() {
             val userID = FirebaseAuth.getInstance().currentUser!!.uid
             val userRef = databaseReference.child(UsersPATH).child(userID).child("groupID")
             userRef.addChildEventListener(eventListener)
+        }
+
+        // グループリストがタップされた時に発火
+        binding.groupListView.setOnItemClickListener{ _, _, position, _ ->
+            binding.groupFab.visibility = View.VISIBLE
+            requireActivity().setTitle("在庫一覧(グループ)")
+
+            val groupID = groupArrayList[position].groupId
+            groupKindName = groupArrayList[position].groupKindName
+            groupInventryListRef = databaseReference.child(InventriesPATH).child(groupID)
+            groupInventryArrayList.clear()
+            invAdapter.setInventryArrayList(groupInventryArrayList)
+            binding.groupListView.adapter = invAdapter
+            groupInventryListRef.addChildEventListener(groupInventryeventListener)
         }
     }
 
@@ -233,5 +249,51 @@ class Group:Fragment() {
         }else{
             return false
         }
+    }
+
+    /**
+     * グループ一覧画面の在庫一覧を表示させる処理
+     */
+    private val groupInventryeventListener = object : ChildEventListener {
+        override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+            if(!snapshot.key.toString().equals("groupName") && !snapshot.key.toString().equals("member")){
+                val map = snapshot.value as Map<*,*>
+                val commodity = map["commodity"] as? String ?: ""
+                val count = map["count"] as? String ?: ""
+                val uid = map["uid"] as? String ?: ""
+                val date = map["date"] as? String ?: ""
+                val genre = map["genre"] as? String ?: ""
+                val notice = map["notice"] as? String ?: ""
+                val place = map["place"] as? String ?: ""
+                val price = map["price"] as? String ?: ""
+                val imageString = map["image"] as? String ?: ""
+                val bytes =
+                    if (imageString.isNotEmpty()) {
+                        Base64.decode(imageString, Base64.DEFAULT)
+                    } else {
+                        byteArrayOf()
+                    }
+
+                val inventry = Inventry(
+                    commodity, price, count, uid, snapshot.key ?: "",
+                    genre, place, date, notice, bytes
+                )
+                groupInventryArrayList.add(inventry)
+                invAdapter.notifyDataSetChanged()
+
+                binding.groupListView.setOnItemClickListener{ parent, _, position, _ ->
+                    // Inventryのインスタンスを渡して質問詳細画面を起動する
+                    try {
+                        val intent = Intent(context, InventryAdd::class.java)
+                        intent.putExtra("inventry", groupInventryArrayList[position])
+                        startActivity(intent)
+                    }catch (e: java.lang.IndexOutOfBoundsException){}
+                }
+            }
+        }
+        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
+        override fun onChildRemoved(snapshot: DataSnapshot) {}
+        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+        override fun onCancelled(error: DatabaseError) {}
     }
 }
