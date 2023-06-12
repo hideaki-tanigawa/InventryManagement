@@ -109,7 +109,7 @@ class Person : Fragment() {
             userRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val data = snapshot.value as Map<*, *>?
-                    val data2 = data!!["groupID"] as Map<*,*>
+                    val data2 = data!!.get("groupID") as Map<*,*>
                     displayInventryListInfo(data2["person"].toString())
                 }
 

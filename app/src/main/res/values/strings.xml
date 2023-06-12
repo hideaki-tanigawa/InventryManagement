@@ -19,7 +19,7 @@
     <string name="login_error_message">正しく入力してください</string>
     <!-- ドロワー・メニュー用文字列 -->
     <string name="screen_select_label">画面選択</string>
-    <string name="menu_inventry_list_label">在庫一覧</string>
+    <string name="menu_inventry_list_label">在庫一覧(個人)</string>
     <string name="menu_shopping_label">買い物リスト</string>
     <string name="menu_group_list_label">グループ一覧</string>
     <string name="menu_user_management_label">ユーザー管理</string>

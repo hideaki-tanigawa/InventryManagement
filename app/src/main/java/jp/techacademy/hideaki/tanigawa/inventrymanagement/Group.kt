@@ -1,6 +1,7 @@
 package jp.techacademy.hideaki.tanigawa.inventrymanagement
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
@@ -22,11 +23,66 @@ import kotlin.collections.HashMap
 
 class Group:Fragment() {
     private lateinit var _binding : GroupMainBinding
-    private val binding get() = _binding!!
+    private val binding get() = _binding
+
     private lateinit var groupName:String
+    private var groupCount:Int = 1
+    private var users:Boolean = true
+    private var visibleView = 0
+
     private lateinit var databaseReference: DatabaseReference
-    private var groupCount:Int = 0
-//    private lateinit var groupArrayList: ArrayList<Inventry>
+    private lateinit var groupArrayList: ArrayList<GroupList>
+    private lateinit var adapter: GroupListAdapter
+    private lateinit var groupListRef: DatabaseReference
+
+    private lateinit var groupInventryArrayList: ArrayList<Inventry>
+    private lateinit var invAdapter: InventryListAdapter
+    private lateinit var groupInventryListRef: DatabaseReference
+
+    private val eventListener = object : ChildEventListener {
+        override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+            val groupValue = snapshot.value.toString()
+            if(!groupValue.equals("person")){
+                val groupID = snapshot.key.toString()
+                databaseReference = FirebaseDatabase.getInstance().reference
+                groupListRef = databaseReference.child(InventriesPATH).child(groupID)
+                groupListRef.addListenerForSingleValueEvent(object : ValueEventListener{
+                    override fun onDataChange(datasnapshot: DataSnapshot) {
+                        val map = datasnapshot.value as Map<*,*>
+                        val groupName = map["groupName"] as? String ?: ""
+
+                        var memberCount = 0
+                        val memberMap = map["member"] as Map<*,*>
+                        for(key in memberMap.keys) {
+                            memberCount++
+                        }
+
+                        val groupList = GroupList(
+                            groupName, memberCount
+                        )
+                        groupArrayList.add(groupList)
+                        adapter.notifyDataSetChanged()
+
+                        groupCount++
+
+                        // グループリストがタップされた時に発火
+                        binding.groupListView.setOnItemClickListener{ _, _, position, _ ->
+                            val groupInvRef = databaseReference.child(InventriesPATH).child(groupID)
+                        }
+                    }
+                    override fun onCancelled(error: DatabaseError) {
+                        TODO("Not yet implemented")
+                    }
+                })
+
+            }
+        }
+        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
+        override fun onChildRemoved(snapshot: DataSnapshot) {}
+        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+        override fun onCancelled(error: DatabaseError) {}
+
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,6 +99,22 @@ class Group:Fragment() {
 
         // Firebase
         databaseReference = FirebaseDatabase.getInstance().reference
+
+        if(visibleView == 0){
+            // fabの表示非表示
+            binding.groupFab.visibility = View.GONE
+        }
+
+        // fabが押された時の処理
+        binding.groupFab.setOnClickListener {
+            if (users) {
+                val intent = Intent(context, LoginActivity::class.java)
+                startActivity(intent)
+            } else {
+                val intent = Intent(context, InventryAdd::class.java)
+                startActivity(intent)
+            }
+        }
 
         val menuHost = requireActivity()
         menuHost.addMenuProvider(object : MenuProvider {
@@ -72,18 +144,7 @@ class Group:Fragment() {
                             if(!groupName.equals("")){
                                 var uuid = UUID.randomUUID().toString()
                                 uuid = uuid.replace("-", "")
-                                val userID = FirebaseAuth.getInstance().currentUser!!.uid
-                                val groupRef = databaseReference.child(UsersPATH).child(userID).child("groupID")
-                                groupRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                                    override fun onDataChange(snapshot: DataSnapshot) {
-                                        val data = snapshot.value as Map<*, *>?
-                                        val personGroup = data!!["person"].toString()
-                                        groupInfoAdd(personGroup, uuid, groupName)
-                                    }
-                                    override fun onCancelled(error: DatabaseError) {}
-                                })
-                            }else{
-                                Log.d("TEST",groupName)
+                                groupInfoAdd(uuid, groupName)
                             }
                         }
                         builder.setNegativeButton("キャンセル",null)
@@ -111,57 +172,52 @@ class Group:Fragment() {
                 return true
             }
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+
+        // ListViewの準備
+        adapter = GroupListAdapter(requireContext())
+        binding.groupListView.adapter = adapter
+        groupArrayList = ArrayList()
+        adapter.setGroupArrayList(groupArrayList)
+        adapter.notifyDataSetChanged()
     }
 
     override fun onResume() {
         super.onResume()
 
-//        users = getLoginBoolean()
-//
-//        // ListViewの準備
-//        adapter = InventryListAdapter(requireContext())
-//        inventryArrayList = ArrayList()
-//        adapter.notifyDataSetChanged()
-//
-//        if(!users){
-//            val userID = FirebaseAuth.getInstance().currentUser!!.uid
-//            val userRef = databaseReference.child(UsersPATH).child(userID)
-//            userRef.addListenerForSingleValueEvent(object : ValueEventListener {
-//                override fun onDataChange(snapshot: DataSnapshot) {
-//                    val data = snapshot.value as Map<*, *>?
-//                    val data2 = data!!["groupID"] as Map<*,*>
-//                    displayInventryListInfo(data2["person"].toString())
-//                }
-//
-//                override fun onCancelled(firebaseError: DatabaseError) {}
-//            })
-//        }
+        users = getLoginBoolean()
+
+        groupArrayList.clear()
+        adapter.setGroupArrayList(groupArrayList)
+        binding.groupListView.adapter = adapter
+
+        if(!users){
+            val userID = FirebaseAuth.getInstance().currentUser!!.uid
+            val userRef = databaseReference.child(UsersPATH).child(userID).child("groupID")
+            userRef.addChildEventListener(eventListener)
+        }
     }
 
     /**
      * 作成したグループをDBに登録する処理
      */
-    private fun groupInfoAdd(personGroup:String, uuid: String, groupName:String){
+    private fun groupInfoAdd(uuid: String, groupName:String){
         // Firebase
         databaseReference = FirebaseDatabase.getInstance().reference
         val userID = FirebaseAuth.getInstance().currentUser!!.uid
 
-        val groupRef = databaseReference.child(UsersPATH).child(userID).child("groupID")
+        val groupRef = databaseReference.child(UsersPATH).child(userID).child("groupID").child(uuid)
         val invGroupRef = databaseReference.child(InventriesPATH).child(uuid)
         val invGroupNameRef = databaseReference.child(InventriesPATH).child(uuid).child("member")
 
-        val addData = HashMap<String, String>()
         val invAddData = HashMap<String, String>()
         val groupNameAddData = HashMap<String, String>()
 
-        addData["person"] = personGroup
-        addData["group" + groupCount.toString()] = uuid
-        groupRef.setValue(addData)
+        groupRef.setValue("group" + groupCount.toString())
 
         groupNameAddData["groupName"] = groupName
         invGroupRef.setValue(groupNameAddData)
 
-        invAddData["gest" + groupCount] = userID
+        invAddData["master"] = userID
         invGroupNameRef.setValue(invAddData)
     }
 

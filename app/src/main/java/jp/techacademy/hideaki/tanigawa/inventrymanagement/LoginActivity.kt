@@ -69,18 +69,16 @@ class LoginActivity : AppCompatActivity() {
                 var uuid = UUID.randomUUID().toString()
                 uuid = uuid.replace("-", "")
                 val invRef = databaseReference.child(InventriesPATH).child(uuid).child("member")
-                val groupRef = databaseReference.child(UsersPATH).child(user!!.uid).child("groupID")
+                val groupRef = databaseReference.child(UsersPATH).child(user!!.uid).child("groupID").child(uuid)
 
                 if (isCreateAccount) {
                     // アカウント作成の時は表示名をFirebaseに保存する
                     val name = binding.nameText.text.toString()
                     val data = HashMap<String, String>()
-                    val data2 = HashMap<String, String>()
                     val invData = HashMap<String, String>()
                     data["name"] = name
                     userRef.setValue(data)
-                    data2["person"] = uuid
-                    groupRef.setValue(data2)
+                    groupRef.setValue("person")
                     invData["master"] = user!!.uid
                     invRef.setValue(invData)
 
