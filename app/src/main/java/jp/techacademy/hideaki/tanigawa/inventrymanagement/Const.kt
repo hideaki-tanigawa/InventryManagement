@@ -7,7 +7,7 @@ const val UsersPATH = "users"
 const val InventriesPATH = "inventry"
 
 // Firebaseに回答を保存するパス
-const val AnswersPATH = "answers"
+const val InvitePATH = "invite"
 
 // Preferenceに表示名を保存する時のキー
 const val NameKEY = "name"

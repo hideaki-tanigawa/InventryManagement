@@ -85,6 +85,7 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
 
         // Intentで送られてきた値の取得
         groupKindName = intent.getStringExtra("groupIdKind").toString()
+        Log.d("TEST",groupKindName)
     }
 
     override fun onResume() {
@@ -212,6 +213,7 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
             // キーボードが出てたら閉じる
             val im = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             im.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS)
+            Log.d("TWWWW","1234567898765432")
 
             val dataBaseReference = FirebaseDatabase.getInstance().reference
 
@@ -223,6 +225,7 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
                     val data2 = data!!["groupID"] as Map<*,*>
                     for(key in data2.keys){
                         val kindName = data2[key] as? String?: ""
+                        Log.d("YYYYYYYY",groupKindName)
                         if(kindName.equals(groupKindName)){
                             registerInventryInfo(key.toString(), userID)
                         }
@@ -314,7 +317,12 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
         val dataBaseReference = FirebaseDatabase.getInstance().reference
 
         val data = HashMap<String, String>()
-        val genreRef = dataBaseReference.child(InventriesPATH).child(groupID)
+
+        val genreRef = if(moveBoolean == true){
+            dataBaseReference.child(InventriesPATH).child(groupID).child(inventry.inventryUid)
+        }else{
+            dataBaseReference.child(InventriesPATH).child(groupID)
+        }
 
         // UID
         data["uid"] = userID
@@ -362,7 +370,12 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
             data["image"] = bitmapString
         }
 
-        genreRef.push().setValue(data, this)
+        Log.d("TEST", "qwertyuiop@")
+        if(moveBoolean == true){
+            genreRef.setValue(data, this)
+        }else{
+            genreRef.push().setValue(data, this)
+        }
         binding.progressBar.visibility = View.VISIBLE
     }
 
@@ -378,7 +391,6 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
      * 要素を代入する処理
      */
     private fun assignmentValue(inventry: Inventry){
-        Log.d("TWWWW","1234567898765432")
         val bytes = inventry.imageBytes
         if (bytes.isNotEmpty()) {
             val image = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)

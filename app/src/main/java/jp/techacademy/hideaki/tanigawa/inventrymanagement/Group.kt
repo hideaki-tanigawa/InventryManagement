@@ -27,6 +27,8 @@ class Group:Fragment() {
     private val binding get() = _binding
 
     private lateinit var groupName:String
+    private lateinit var memberId: String
+    private var groupId: String = ""
     private var groupCount:Int = 1
     private var users:Boolean = true
     private var groupKindName = ""
@@ -170,6 +172,45 @@ class Group:Fragment() {
                             }
                         })
                     }
+
+                    R.id.action_group_member -> {
+                        memberId = ""
+                        val dialogLayout = LayoutInflater.from(context).inflate(R.layout.dialog_group_member_invite,null)
+                        val memberIdInviteEdit = dialogLayout.findViewById<AppCompatEditText>(R.id.memberIdInviteEdit)
+                        // ダイアログを表示する
+                        val builder = AlertDialog.Builder(context)
+
+                        builder.setTitle("メンバー招待")
+                        builder.setMessage("メンバーのIDを入力して下さい")
+                        builder.setView(dialogLayout)
+                        builder.setPositiveButton("招待") { _, _ ->
+                            if(!memberId.equals("")){
+                                var uuid = UUID.randomUUID().toString()
+                                uuid = uuid.replace("-", "")
+                                groupMemberInvite(memberId, groupId)
+                            }
+                        }
+                        builder.setNegativeButton("キャンセル",null)
+                        val dialog = builder.create()
+                        dialog.show()
+                        memberIdInviteEdit.addTextChangedListener(object : TextWatcher {
+                            override fun beforeTextChanged(
+                                p0: CharSequence?,
+                                p1: Int,
+                                p2: Int,
+                                p3: Int
+                            ) {}
+                            override fun onTextChanged(
+                                p0: CharSequence?,
+                                p1: Int,
+                                p2: Int,
+                                p3: Int
+                            ) {}
+                            override fun afterTextChanged(p0: Editable?) {
+                                memberId = p0.toString()
+                            }
+                        })
+                    }
                 }
                 return true
             }
@@ -215,9 +256,9 @@ class Group:Fragment() {
             item!!.isVisible = false
             item2!!.isVisible = true
 
-            val groupID = groupArrayList[position].groupId
+            groupId = groupArrayList[position].groupId
             groupKindName = groupArrayList[position].groupKindName
-            groupInventryListRef = databaseReference.child(InventriesPATH).child(groupID)
+            groupInventryListRef = databaseReference.child(InventriesPATH).child(groupId)
             groupInventryArrayList.clear()
             invAdapter.setInventryArrayList(groupInventryArrayList)
             binding.groupListView.adapter = invAdapter
@@ -298,6 +339,7 @@ class Group:Fragment() {
                     try {
                         val intent = Intent(context, InventryAdd::class.java)
                         intent.putExtra("inventry", groupInventryArrayList[position])
+                        intent.putExtra("groupIdKind", groupKindName)
                         startActivity(intent)
                     }catch (e: java.lang.IndexOutOfBoundsException){}
                 }
@@ -307,5 +349,21 @@ class Group:Fragment() {
         override fun onChildRemoved(snapshot: DataSnapshot) {}
         override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
         override fun onCancelled(error: DatabaseError) {}
+    }
+
+    /**
+     * グループのメンバーに招待する処理
+     */
+    private fun groupMemberInvite(receiveId: String, groupID: String){
+        // Firebase
+        databaseReference = FirebaseDatabase.getInstance().reference
+        val userID = FirebaseAuth.getInstance().currentUser!!.uid
+
+        val memberInviteRef = databaseReference.child("invite").child(receiveId)
+
+        val inviteDate = HashMap<String, String>()
+        inviteDate[groupID] = userID
+
+        memberInviteRef.setValue(inviteDate)
     }
 }

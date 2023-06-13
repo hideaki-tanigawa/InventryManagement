@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/groupNameTextView"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:gravity="center_vertical"
+        android:text="@string/notice_list_group_name"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/inviteBooleanLayout"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/sendUserNameText"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        android:text="@string/notice_list_member_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/inviteBooleanLayout"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintTop_toBottomOf="@+id/groupNameTextView" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/inviteBooleanLayout"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@+id/groupNameTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:id="@+id/inviteParticipationButton"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_marginRight="8dp"
+            android:text="@string/notice_list_participation_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/inviteRefusalButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/inviteRefusalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="@string/notice_list_refusal_button"
+            android:layout_marginRight="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

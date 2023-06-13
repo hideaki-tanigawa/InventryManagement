@@ -67,6 +67,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onResume() {
         super.onResume()
+
+        val userLoginBoolean = getLoginBoolean()
+
+        if(userLoginBoolean){
+            val intent = Intent(applicationContext, LoginActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     // ----- 追加:ここから
@@ -78,7 +85,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 startActivity(intent)
             }
             R.id.nav_group_notice -> {
-                binding.content.toolbar.title = getString(R.string.menu_group_notice_label)
+                val intent = Intent(applicationContext, NoticeListActivity::class.java)
+                startActivity(intent)
 //                binding.content.inner.priceTextView.visibility = View.VISIBLE
             }
         }

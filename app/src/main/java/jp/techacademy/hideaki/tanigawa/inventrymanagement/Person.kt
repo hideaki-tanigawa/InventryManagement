@@ -169,6 +169,7 @@ class Person : Fragment() {
                     // Inventryのインスタンスを渡して質問詳細画面を起動する
                     val intent = Intent(context, InventryAdd::class.java)
                     intent.putExtra("inventry", inventryArrayList[position])
+                    intent.putExtra("groupIdKind","person")
                     startActivity(intent)
                 }
 
