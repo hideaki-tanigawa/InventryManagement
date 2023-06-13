@@ -68,29 +68,6 @@ class Person : Fragment() {
             }
         }
 
-        if (groupExit == 0) {
-            val menuHost = requireActivity()
-            menuHost.addMenuProvider(object : MenuProvider {
-                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                    menuInflater.inflate(R.menu.menu_main, menu)
-                    val item = menu.findItem(R.id.action_group_member)
-
-                    val drawble = item.icon
-                    drawble!!.colorFilter = BlendModeColorFilterCompat
-                        .createBlendModeColorFilterCompat(Color.WHITE, BlendModeCompat.SRC_ATOP)
-                    item.setIcon(drawble)
-                }
-
-                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                    when (menuItem.itemId) {
-                        R.id.action_group_member -> {
-                        }
-                    }
-                    return true
-                }
-            }, viewLifecycleOwner, Lifecycle.State.RESUMED)
-        }
-
         // Firebase
         databaseReference = FirebaseDatabase.getInstance().reference
     }

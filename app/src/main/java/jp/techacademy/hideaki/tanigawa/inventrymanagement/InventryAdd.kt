@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
@@ -18,12 +19,16 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.graphics.BlendModeColorFilterCompat
+import androidx.core.graphics.BlendModeCompat
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -103,6 +108,35 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
         spinner.setSelection(noticeNo)
+    }
+
+    /**
+     * 右上のメニューから買い物リスト追加アイコンを表示する
+     */
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_inventory_add, menu)
+
+        // アイコンの色を白に変更する
+        val item = menu.findItem(R.id.action_shop_list_add)
+        val drawble = item!!.icon
+        drawble!!.colorFilter = BlendModeColorFilterCompat
+            .createBlendModeColorFilterCompat(Color.WHITE, BlendModeCompat.SRC_ATOP)
+        item!!.setIcon(drawble)
+        return true
+    }
+
+    /**
+     * 右上のメニューから買い物リストに追加できるようにする
+     */
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
+            R.id.action_shop_list_add -> true
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     /**

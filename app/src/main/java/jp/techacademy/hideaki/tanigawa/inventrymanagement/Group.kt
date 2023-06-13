@@ -30,6 +30,8 @@ class Group:Fragment() {
     private var groupCount:Int = 1
     private var users:Boolean = true
     private var groupKindName = ""
+    private var item: MenuItem? = null
+    private var item2: MenuItem? = null
 
     private lateinit var databaseReference: DatabaseReference
     private lateinit var groupArrayList: ArrayList<GroupList>
@@ -113,12 +115,19 @@ class Group:Fragment() {
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.menu_group_create, menu)
-                val item = menu.findItem(R.id.action_group_create)
+                item = menu.findItem(R.id.action_group_create)
+                item2 = menu.findItem(R.id.action_group_member)
 
-                val drawble = item.icon
+                item2!!.isVisible = false
+
+                val drawble = item!!.icon
+                val drawble2 = item2!!.icon
                 drawble!!.colorFilter = BlendModeColorFilterCompat
                     .createBlendModeColorFilterCompat(Color.WHITE, BlendModeCompat.SRC_ATOP)
-                item.setIcon(drawble)
+                drawble2!!.colorFilter = BlendModeColorFilterCompat
+                    .createBlendModeColorFilterCompat(Color.WHITE, BlendModeCompat.SRC_ATOP)
+                item!!.setIcon(drawble)
+                item2!!.setIcon(drawble2)
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -202,6 +211,9 @@ class Group:Fragment() {
         binding.groupListView.setOnItemClickListener{ _, _, position, _ ->
             binding.groupFab.visibility = View.VISIBLE
             requireActivity().setTitle("在庫一覧(グループ)")
+
+            item!!.isVisible = false
+            item2!!.isVisible = true
 
             val groupID = groupArrayList[position].groupId
             groupKindName = groupArrayList[position].groupKindName
