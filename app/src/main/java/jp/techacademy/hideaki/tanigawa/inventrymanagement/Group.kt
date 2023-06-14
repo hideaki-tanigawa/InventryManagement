@@ -359,11 +359,8 @@ class Group:Fragment() {
         databaseReference = FirebaseDatabase.getInstance().reference
         val userID = FirebaseAuth.getInstance().currentUser!!.uid
 
-        val memberInviteRef = databaseReference.child("invite").child(receiveId)
+        val memberInviteRef = databaseReference.child("invite").child(receiveId).child(groupID)
 
-        val inviteDate = HashMap<String, String>()
-        inviteDate[groupID] = userID
-
-        memberInviteRef.setValue(inviteDate)
+        memberInviteRef.setValue(userID)
     }
 }

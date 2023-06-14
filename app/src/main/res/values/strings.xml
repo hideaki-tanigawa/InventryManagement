@@ -23,7 +23,7 @@
     <string name="menu_shopping_label">買い物リスト</string>
     <string name="menu_group_list_label">グループ一覧</string>
     <string name="menu_user_management_label">ユーザー管理</string>
-    <string name="menu_group_notice_label">通知管理</string>
+    <string name="menu_group_notice_label">グループ招待管理</string>
     <string name="menu_group_member_add_label">グループメンバー追加</string>
     <string name="menu_inventory_shop_add_label">買い物リストに追加</string>
     <!-- 設定画面用文字列 -->

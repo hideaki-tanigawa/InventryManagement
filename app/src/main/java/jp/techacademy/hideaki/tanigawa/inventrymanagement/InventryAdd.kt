@@ -26,6 +26,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
@@ -118,8 +119,16 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_inventory_add, menu)
 
-        // アイコンの色を白に変更する
         val item = menu.findItem(R.id.action_shop_list_add)
+
+        // 在庫新規登録と編集時でのアイコン表示・非表示
+        if(moveBoolean){
+            item.setVisible(true)
+        }else{
+            item.setVisible(false)
+        }
+
+        // アイコンの色を白に変更する
         val drawble = item!!.icon
         drawble!!.colorFilter = BlendModeColorFilterCompat
             .createBlendModeColorFilterCompat(Color.WHITE, BlendModeCompat.SRC_ATOP)
@@ -131,13 +140,43 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
      * 右上のメニューから買い物リストに追加できるようにする
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_shop_list_add -> true
-            else -> super.onOptionsItemSelected(item)
+        val itemId = item.itemId
+
+        when(itemId){
+            R.id.action_shop_list_add -> {
+                val dataBaseReference = FirebaseDatabase.getInstance().reference
+                val userID = FirebaseAuth.getInstance().currentUser!!.uid
+                val userRef = dataBaseReference.child(UsersPATH).child(userID)
+                var price = 0
+
+                // 一つあたりの価格計算
+                price = inventry.price.toInt() / inventry.count.toInt()
+
+                val shopMap = HashMap<String,String>()
+                shopMap["buyCount"] = "1"
+                shopMap["buyPrice"] = price.toString()
+                shopMap["inventryId"] = inventry.inventryUid
+
+                userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val data = snapshot.value as Map<*, *>?
+                        val data2 = data!!["groupID"] as Map<*,*>
+                        for(key in data2.keys){
+                            val kindName = data2[key] as? String?: ""
+                            if(kindName.equals(groupKindName)){
+                                val shopRef = dataBaseReference.child(ShoppingPATH).child(key.toString())
+                                shopRef.setValue(shopMap)
+                                Toast.makeText(this@InventryAdd, "この在庫品を買い物リストに追加いたしました", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    }
+
+                    override fun onCancelled(firebaseError: DatabaseError) {}
+                })
+            }
         }
+
+        return super.onOptionsItemSelected(item)
     }
 
     /**
@@ -213,7 +252,6 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
             // キーボードが出てたら閉じる
             val im = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             im.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS)
-            Log.d("TWWWW","1234567898765432")
 
             val dataBaseReference = FirebaseDatabase.getInstance().reference
 
@@ -225,7 +263,6 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
                     val data2 = data!!["groupID"] as Map<*,*>
                     for(key in data2.keys){
                         val kindName = data2[key] as? String?: ""
-                        Log.d("YYYYYYYY",groupKindName)
                         if(kindName.equals(groupKindName)){
                             registerInventryInfo(key.toString(), userID)
                         }
