@@ -123,7 +123,11 @@ class Shop:Fragment() {
                     adapter.notifyDataSetChanged()
 
                     binding.listView.setOnItemClickListener{parent, _, position, _ ->
-
+                        // Inventryのインスタンスを渡して質問詳細画面を起動する
+                        val intent = Intent(context, InventryAdd::class.java)
+                        intent.putExtra("inventry", shopListArrayList[position])
+                        intent.putExtra("shopList",true)
+                        startActivity(intent)
                     }
 
                     // ListViewを長押しした時の処理

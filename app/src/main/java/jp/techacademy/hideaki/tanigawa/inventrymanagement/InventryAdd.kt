@@ -463,4 +463,28 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
 
         setDateTimeButtonText()
     }
+
+    /**
+     * グループ名を表示するためのSpinnerの処理
+     */
+    private fun groupNameSpinner(){
+        // Spinnerの表示
+        val spinner = findViewById<Spinner>(R.id.groupNameSpinner)
+        val adapter = ArrayAdapter.createFromResource(this, R.array.notice_time_array,android.R.layout.simple_spinner_item)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+
+        // OnItemSelectedListenerの実装
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            // 項目が選択された時に呼ばれる
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val spinnerId = parent?.selectedItemId
+                noticeId = spinnerId!!.toString()
+            }
+
+            // 基本的には呼ばれないが、何らかの理由で選択されることなく項目が閉じられたら呼ばれる
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+        spinner.setSelection(noticeNo)
+    }
 }
