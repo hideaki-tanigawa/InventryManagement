@@ -406,6 +406,7 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
         data["place"] = place
         data["date"] = date
         data["notice"] = notice
+        data["shopBoolean"] = "0"
 
         // 添付画像を取得する
         val drawable = binding.commodityImage.drawable as? BitmapDrawable
