@@ -9,54 +9,48 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.graphics.Matrix
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Base64
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.graphics.BlendModeColorFilterCompat
-import androidx.core.graphics.BlendModeCompat
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ActivityInventryAddBinding
-import java.io.ByteArrayOutputStream
+import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ActivityShopListAddBinding
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
+import kotlin.collections.ArrayList
 
-class InventryAdd : AppCompatActivity(), View.OnClickListener,
+class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
     DatabaseReference.CompletionListener {
     companion object {
         private const val PERMISSIONS_REQUEST_CODE = 100
     }
 
-    private lateinit var binding: ActivityInventryAddBinding
+    private lateinit var binding: ActivityShopListAddBinding
+    private lateinit var databaseReference: DatabaseReference
     private lateinit var inventry: Inventry
     private var moveBoolean: Boolean = false
     private var pictureUri: Uri? = null
     private var calendar = Calendar.getInstance()
     private var noticeId: String = ""
-    private var groupKindName: String = ""
     private var noticeNo = 0
+    private var userHaveGroupIdArrayList = ArrayList<String>()
+    private var participateGroupName = ArrayList<String>()
+    private val userHaveGroupMap = HashMap<String, String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityInventryAddBinding.inflate(layoutInflater)
+        binding = ActivityShopListAddBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // 渡ってきたQuestionのオブジェクトを保持する
@@ -74,7 +68,7 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
         }
 
         // UIの準備
-        title = getString(R.string.inventry_send_title)
+        title = "買い物リスト作成"
         binding.commodityAddButton.setOnClickListener(this)
         binding.commodityImage.setOnClickListener(this)
         binding.dateButton.setOnClickListener(this)
@@ -84,9 +78,8 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
             assignmentValue(inventry)
         }
 
-        // Intentで送られてきた値の取得
-        groupKindName = intent.getStringExtra("groupIdKind").toString()
-        Log.d("TEST",groupKindName)
+        // Firebase
+        databaseReference = FirebaseDatabase.getInstance().reference
     }
 
     override fun onResume() {
@@ -110,73 +103,8 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
         spinner.setSelection(noticeNo)
-    }
 
-    /**
-     * 右上のメニューから買い物リスト追加アイコンを表示する
-     */
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_inventory_add, menu)
-
-        val item = menu.findItem(R.id.action_shop_list_add)
-
-        // 在庫新規登録と編集時でのアイコン表示・非表示
-        if(moveBoolean){
-            item.setVisible(true)
-        }else{
-            item.setVisible(false)
-        }
-
-        // アイコンの色を白に変更する
-        val drawble = item!!.icon
-        drawble!!.colorFilter = BlendModeColorFilterCompat
-            .createBlendModeColorFilterCompat(Color.WHITE, BlendModeCompat.SRC_ATOP)
-        item!!.setIcon(drawble)
-        return true
-    }
-
-    /**
-     * 右上のメニューから買い物リストに追加できるようにする
-     */
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val itemId = item.itemId
-
-        when(itemId){
-            R.id.action_shop_list_add -> {
-                val dataBaseReference = FirebaseDatabase.getInstance().reference
-                val userID = FirebaseAuth.getInstance().currentUser!!.uid
-                val userRef = dataBaseReference.child(UsersPATH).child(userID)
-                var price = 0
-
-                // 一つあたりの価格計算
-                price = inventry.price.toInt() / inventry.count.toInt()
-
-                val shopMap = HashMap<String,String>()
-                shopMap["buyCount"] = "1"
-                shopMap["buyPrice"] = price.toString()
-                shopMap["inventryId"] = inventry.inventryUid
-
-                userRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        val data = snapshot.value as Map<*, *>?
-                        val data2 = data!!["groupID"] as Map<*,*>
-                        for(key in data2.keys){
-                            val kindName = data2[key] as? String?: ""
-                            if(kindName.equals(groupKindName)){
-                                val shopRef = dataBaseReference.child(ShoppingPATH).child(key.toString())
-                                shopRef.setValue(shopMap)
-                                Toast.makeText(this@InventryAdd, "この在庫品を買い物リストに追加いたしました", Toast.LENGTH_LONG).show()
-                            }
-                        }
-                    }
-
-                    override fun onCancelled(firebaseError: DatabaseError) {}
-                })
-            }
-        }
-
-        return super.onOptionsItemSelected(item)
+        getuserHaveGropId()
     }
 
     /**
@@ -252,25 +180,6 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
             // キーボードが出てたら閉じる
             val im = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             im.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS)
-
-            val dataBaseReference = FirebaseDatabase.getInstance().reference
-
-            val userID = FirebaseAuth.getInstance().currentUser!!.uid
-            val userRef = dataBaseReference.child(UsersPATH).child(userID)
-            userRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val data = snapshot.value as Map<*, *>?
-                    val data2 = data!!["groupID"] as Map<*,*>
-                    for(key in data2.keys){
-                        val kindName = data2[key] as? String?: ""
-                        if(kindName.equals(groupKindName)){
-                            registerInventryInfo(key.toString(), userID)
-                        }
-                    }
-                }
-
-                override fun onCancelled(firebaseError: DatabaseError) {}
-            })
         } else if (v === binding.dateButton) {
             // 日付ダイアログを表示する
             /**
@@ -348,76 +257,6 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
     }
 
     /**
-     * Firebaseに登録する処理
-     */
-    private fun registerInventryInfo(groupID: String, userID: String){
-        val dataBaseReference = FirebaseDatabase.getInstance().reference
-
-        val data = HashMap<String, String>()
-
-        val genreRef = if(moveBoolean == true){
-            dataBaseReference.child(InventriesPATH).child(groupID).child(inventry.inventryUid)
-        }else{
-            dataBaseReference.child(InventriesPATH).child(groupID)
-        }
-
-        // UID
-        data["uid"] = userID
-
-        // タイトルと本文を取得する
-        val title = binding.commodityNameEdit.text.toString()
-        val price = binding.commodityPriceEdit.text.toString()
-        val count = binding.commodityCountEdit.text.toString()
-        val genre = binding.commodityGenreEdit.text.toString()
-        val place = binding.commodityPlaceEdit.text.toString()
-        val notice = noticeId
-        val date = binding.commodityDateText.text.toString()
-
-        if (title.isEmpty()) {
-            // タイトルが入力されていない時はエラーを表示するだけ
-            Snackbar.make(binding.commodityAddButton, getString(R.string.input_title), Snackbar.LENGTH_LONG).show()
-            return
-        }
-
-        if (price.isEmpty()) {
-            // 質問が入力されていない時はエラーを表示するだけ
-            Snackbar.make(binding.commodityAddButton, getString(R.string.price_message), Snackbar.LENGTH_LONG).show()
-            return
-        }
-
-        data["commodity"] = title
-        data["price"] = price
-        data["count"] = count
-        data["genre"] = genre
-        data["place"] = place
-        data["date"] = date
-        data["notice"] = notice
-        data["shopBoolean"] = "0"
-
-        // 添付画像を取得する
-        val drawable = binding.commodityImage.drawable as? BitmapDrawable
-
-        // 添付画像が設定されていれば画像を取り出してBASE64エンコードする
-        if (drawable != null) {
-            val bitmap = drawable.bitmap
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream)
-            val bitmapString =
-                Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT)
-
-            data["image"] = bitmapString
-        }
-
-        Log.d("TEST", "qwertyuiop@")
-        if(moveBoolean == true){
-            genreRef.setValue(data, this)
-        }else{
-            genreRef.push().setValue(data, this)
-        }
-        binding.progressBar.visibility = View.VISIBLE
-    }
-
-    /**
      * 日付と時刻のボタンの表示を設定する
      */
     private fun setDateTimeButtonText() {
@@ -427,6 +266,7 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
 
     /**
      * 要素を代入する処理
+     * @param inventry: 買い物リストの商品情報
      */
     private fun assignmentValue(inventry: Inventry){
         val bytes = inventry.imageBytes
@@ -448,5 +288,81 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
         calendar.time = simpleDateFormat.parse(inventry.date) as Date
 
         setDateTimeButtonText()
+    }
+
+    /**
+     * ユーザーが参加しているグループのID一覧を取得する
+     */
+    private fun getuserHaveGropId(){
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        val userRef = databaseReference.child(UsersPATH).child(userId)
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val userMap = snapshot.value as Map<*,*>
+                val groupIdMap = userMap["groupID"] as Map<*,*>
+                for(key in groupIdMap.keys){
+                    userHaveGroupIdArrayList.add(key.toString())
+                }
+                getuserHaveGroupName()
+            }
+            override fun onCancelled(error: DatabaseError) {}
+
+        })
+    }
+
+    /**
+     * ユーザーが所属しているグループの名前一覧を取得
+     */
+    private fun getuserHaveGroupName(){
+        val inventoryRef = databaseReference
+        inventoryRef.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val wholeMap = snapshot.value as Map<*,*>
+                val groupMap = wholeMap[InventriesPATH] as Map<*,*>
+                for(key in groupMap.keys){
+                    Log.d("group-test",key.toString())
+                    for(arrayIndex in userHaveGroupIdArrayList.indices){
+                        if(key.toString().equals(userHaveGroupIdArrayList[arrayIndex])){
+                            val groupNameMap = groupMap[key] as Map<*,*>
+                            val groupName = groupNameMap["groupName"] as? String ?: ""
+                            if(groupName.equals("")){
+                                participateGroupName.add("個人")
+                            }else{
+                                participateGroupName.add(groupName)
+                            }
+                        }
+                    }
+                }
+                groupNameSpinner()
+            }
+            override fun onCancelled(error: DatabaseError) {}
+
+        })
+    }
+
+    // Spinnerにグループ名を入れる
+    private fun groupNameSpinner(){
+        for (index in userHaveGroupIdArrayList.indices){
+            userHaveGroupMap[participateGroupName[index]] = userHaveGroupIdArrayList[index]
+        }
+
+        // Spinnerの表示
+        val spinner = findViewById<Spinner>(R.id.groupNameSpinner)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, participateGroupName)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+
+        // OnItemSelectedListenerの実装
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            // 項目が選択された時に呼ばれる
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val spinnerId = parent?.selectedItemId
+                noticeId = spinnerId!!.toString()
+            }
+
+            // 基本的には呼ばれないが、何らかの理由で選択されることなく項目が閉じられたら呼ばれる
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+        spinner.setSelection(0)
     }
 }

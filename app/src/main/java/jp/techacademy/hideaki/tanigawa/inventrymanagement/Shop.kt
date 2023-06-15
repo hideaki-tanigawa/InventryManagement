@@ -12,17 +12,19 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ContentMainBinding
+import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ShopMainBinding
 
 class Shop:Fragment() {
-    private lateinit var _binding : ContentMainBinding
+    private lateinit var _binding : ShopMainBinding
     private val binding get() = _binding!!
 
     private lateinit var databaseReference: DatabaseReference
     private lateinit var shopListArrayList: ArrayList<Inventry>
-    private lateinit var adapter: InventryListAdapter
+    private lateinit var adapter: ShopListAdapter
     private lateinit var shopRef: DatabaseReference
     private lateinit var userRef: DatabaseReference
     private lateinit var invRef:DatabaseReference
+    private var shopListPrice = 0
 
     private val groupList = arrayListOf<String>()
 
@@ -31,7 +33,7 @@ class Shop:Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        _binding = ContentMainBinding.inflate(inflater, container, false)
+        _binding = ShopMainBinding.inflate(inflater, container, false)
         val root: View = binding.root
         return root
     }
@@ -39,9 +41,8 @@ class Shop:Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.fab.setOnClickListener{
-            val intent = Intent(context, InventryAdd::class.java)
-            intent.putExtra("shopList",true)
+        binding.shopFab.setOnClickListener{
+            val intent = Intent(context, ShopListAddActivity::class.java)
             startActivity(intent)
         }
 
@@ -49,7 +50,7 @@ class Shop:Fragment() {
         databaseReference = FirebaseDatabase.getInstance().reference
 
         // ListViewの準備
-        adapter = InventryListAdapter(requireContext())
+        adapter = ShopListAdapter(requireContext())
         shopListArrayList = ArrayList()
         adapter.notifyDataSetChanged()
     }
@@ -58,8 +59,8 @@ class Shop:Fragment() {
         super.onResume()
 
         shopListArrayList.clear()
-        adapter.setInventryArrayList(shopListArrayList)
-        binding.listView.adapter = adapter
+        adapter.setShopListArrayList(shopListArrayList)
+        binding.shopListView.adapter = adapter
 
         val userId = FirebaseAuth.getInstance().currentUser!!.uid
         userRef = databaseReference.child(UsersPATH).child(userId)
@@ -119,19 +120,23 @@ class Shop:Fragment() {
                         commodity, price, count, uid, inventryId,
                         genre, place, date, notice, bytes
                     )
+
+                    shopListPrice += price.toInt()
+
+                    binding.inventryAllPriceText.setText("合計金額："+shopListPrice+"円")
+
                     shopListArrayList.add(inventry)
                     adapter.notifyDataSetChanged()
 
-                    binding.listView.setOnItemClickListener{parent, _, position, _ ->
+                    binding.shopListView.setOnItemClickListener{parent, _, position, _ ->
                         // Inventryのインスタンスを渡して質問詳細画面を起動する
-                        val intent = Intent(context, InventryAdd::class.java)
+                        val intent = Intent(context, ShopListAddActivity::class.java)
                         intent.putExtra("inventry", shopListArrayList[position])
-                        intent.putExtra("shopList",true)
                         startActivity(intent)
                     }
 
                     // ListViewを長押しした時の処理
-                    binding.listView.setOnItemLongClickListener{parent, _, position, _ ->
+                    binding.shopListView.setOnItemLongClickListener{parent, _, position, _ ->
                         // 在庫品を削除する
                         val inventry = parent.adapter.getItem(position) as Inventry
 

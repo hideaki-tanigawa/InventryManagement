@@ -24,20 +24,46 @@
         android:text="@string/title_label"
         android:gravity="center_vertical"
         android:textSize="20sp"
-        app:layout_constraintEnd_toStartOf="@+id/inventry_count_text"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_weight="2"
+        app:layout_constraintEnd_toStartOf="@+id/inventryCountLayout"
         app:layout_constraintStart_toEndOf="@+id/inventry_image_view"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/inventry_count_text"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/inventryCountLayout"
+        android:layout_width="0dp"
         android:layout_height="80dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/inventry_count"
-        android:gravity="center_vertical"
-        android:textSize="32sp"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_weight="1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/inventry_title_text"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/inventryCountText"
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:gravity="center"
+            android:text="@string/inventry_count"
+            android:textSize="32sp"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="MissingConstraints" />
+
+        <TextView
+            android:id="@+id/inventryCountNumberText"
+            android:layout_width="0dp"
+            android:layout_height="80dp"
+            android:textSize="24sp"
+            android:gravity="center"
+            android:text="@string/inventry_unit"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/inventryCountText"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

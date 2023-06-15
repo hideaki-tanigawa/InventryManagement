@@ -17,6 +17,9 @@
         android:theme="@style/Theme.InventryManagement"
         tools:targetApi="31">
         <activity
+            android:name=".ShopListAddActivity"
+            android:exported="false" />
+        <activity
             android:name=".NoticeListActivity"
             android:exported="false" />
         <activity

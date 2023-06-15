@@ -183,6 +183,7 @@ class Person : Fragment() {
 
                     builder.setTitle("削除")
                     builder.setMessage(commodity + "を削除しますか")
+
                     builder.setPositiveButton("OK") {_, _ ->
                         val userID = FirebaseAuth.getInstance().currentUser!!.uid
                         val userRef = databaseReference.child(UsersPATH).child(userID)
