@@ -52,6 +52,7 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
     private var calendar = Calendar.getInstance()
     private var noticeId: String = ""
     private var groupKindName: String = ""
+    private var shopListFlag: Boolean = false
     private var noticeNo = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,6 +72,19 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
             moveBoolean = true
         }catch (e: NullPointerException){
             moveBoolean = false
+        }
+
+        // 買い物一覧画面から飛ばれているかBooleanで判別
+        shopListFlag = intent.getBooleanExtra("shopList",false)
+
+        // true：グループ名を選択するSpinnerを表示
+        // false：グループ名を選択するSpinnerを非表示
+        if(shopListFlag){
+            binding.shopListGroupCorrectWrong.visibility = View.VISIBLE
+            binding.groupNameSpinner.visibility = View.VISIBLE
+        }else{
+            binding.shopListGroupCorrectWrong.visibility = View.GONE
+            binding.groupNameSpinner.visibility = View.GONE
         }
 
         // UIの準備
