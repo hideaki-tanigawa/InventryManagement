@@ -122,6 +122,10 @@ class Shop:Fragment() {
                     shopListArrayList.add(inventry)
                     adapter.notifyDataSetChanged()
 
+                    binding.listView.setOnItemClickListener{parent, _, position, _ ->
+
+                    }
+
                     // ListViewを長押しした時の処理
                     binding.listView.setOnItemLongClickListener{parent, _, position, _ ->
                         // 在庫品を削除する
