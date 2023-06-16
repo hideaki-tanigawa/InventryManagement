@@ -10,11 +10,14 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Selection.setSelection
+import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -26,6 +29,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ActivityShopListAddBinding
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -38,15 +42,21 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
 
     private lateinit var binding: ActivityShopListAddBinding
     private lateinit var databaseReference: DatabaseReference
+    private lateinit var inviteRef: DatabaseReference
+    private lateinit var shopRef: DatabaseReference
     private lateinit var inventry: Inventry
+    private var inventryName = ""
     private var moveBoolean: Boolean = false
     private var pictureUri: Uri? = null
     private var calendar = Calendar.getInstance()
     private var noticeId: String = ""
+    private var groupNameSpinnerValue: String = ""
     private var noticeNo = 0
+    private var groupIdShoop: String = ""
     private var userHaveGroupIdArrayList = ArrayList<String>()
     private var participateGroupName = ArrayList<String>()
     private val userHaveGroupMap = HashMap<String, String>()
+    private val shopListMap = HashMap<String, String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -180,6 +190,54 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
             // キーボードが出てたら閉じる
             val im = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             im.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS)
+
+            val userId = FirebaseAuth.getInstance().currentUser!!.uid
+
+            val data = HashMap<String, String>()
+
+            val title = binding.commodityNameEdit.text.toString()
+            val price = binding.commodityPriceEdit.text.toString()
+            val count = binding.commodityCountEdit.text.toString()
+            val genre = binding.commodityGenreEdit.text.toString()
+            val place = binding.commodityPlaceEdit.text.toString()
+            val notice = noticeId
+            val date = binding.commodityDateText.text.toString()
+            val groupId = userHaveGroupMap[groupNameSpinnerValue]
+
+            data["uid"] = userId
+            data["commodity"] = title
+            inventryName = title
+            data["price"] = price
+            data["count"] = count
+            data["genre"] = genre
+            data["place"] = place
+            data["date"] = date
+            data["notice"] = notice
+
+            // 添付画像を取得する
+            val drawable = binding.commodityImage.drawable as? BitmapDrawable
+
+            // 添付画像が設定されていれば画像を取り出してBASE64エンコードする
+            if (drawable != null) {
+                val bitmap = drawable.bitmap
+                val byteArrayOutputStream = ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream)
+                val bitmapString =
+                    Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT)
+
+                data["image"] = bitmapString
+            }
+
+            // 買い物リストの作成処理か編集処理かを分岐している
+            if(moveBoolean && groupId != null){
+                data["shopBoolean"] = "0"
+                shoppingListEdit(data, groupId, inventry.inventryUid)
+            }else{
+                data["shopBoolean"] = "1"
+                if (groupId != null) {
+                    shopListAdd(data, groupId)
+                }
+            }
         } else if (v === binding.dateButton) {
             // 日付ダイアログを表示する
             /**
@@ -282,6 +340,7 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
         binding.commodityGenreEdit.setText(inventry.genre)
         binding.commodityPlaceEdit.setText(inventry.place)
         noticeNo = inventry.notice.toInt()
+        groupIdShoop = inventry.groupId
 
         // 在庫の日付をcalendarに反映
         val simpleDateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.JAPANESE)
@@ -320,7 +379,6 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
                 val wholeMap = snapshot.value as Map<*,*>
                 val groupMap = wholeMap[InventriesPATH] as Map<*,*>
                 for(key in groupMap.keys){
-                    Log.d("group-test",key.toString())
                     for(arrayIndex in userHaveGroupIdArrayList.indices){
                         if(key.toString().equals(userHaveGroupIdArrayList[arrayIndex])){
                             val groupNameMap = groupMap[key] as Map<*,*>
@@ -346,6 +404,8 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
             userHaveGroupMap[participateGroupName[index]] = userHaveGroupIdArrayList[index]
         }
 
+        val groupName = mapGetKey(userHaveGroupMap,groupIdShoop)
+
         // Spinnerの表示
         val spinner = findViewById<Spinner>(R.id.groupNameSpinner)
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, participateGroupName)
@@ -356,13 +416,111 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             // 項目が選択された時に呼ばれる
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val spinnerId = parent?.selectedItemId
-                noticeId = spinnerId!!.toString()
+                val spinnerId = parent?.selectedItem
+                groupNameSpinnerValue = spinnerId!!.toString()
             }
 
             // 基本的には呼ばれないが、何らかの理由で選択されることなく項目が閉じられたら呼ばれる
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
-        spinner.setSelection(0)
+
+        spinner.setSelection(setSelection(spinner, groupName))
+    }
+
+    /**
+     * 買い物リストを作成する処理
+     * Firebaseの在庫一覧ノードと買い物一覧ノードに商品情報を保存
+     */
+    private fun shopListAdd(groupMap: Map<String,String>, groupId: String){
+        shopListMap["buyCount"] = groupMap["count"].toString()
+        shopListMap["buyPrice"] = groupMap["price"].toString()
+
+        inviteRef = databaseReference.child(InventriesPATH).child(groupId)
+        inviteRef.push().setValue(groupMap)
+
+
+        groupIdShoop = groupId
+        inviteRef.addChildEventListener(eventListener)
+
+        Log.d("TEST",inviteRef.key.toString())
+
+//        inviteRef.addListenerForSingleValueEvent(object : ValueEventListener{
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//                val inventryUid = snapshot.key.toString()
+//                val invMap = snapshot.value as Map<*,*>
+//                Log.d("TEST",invMap.keys.toString())
+//                finish()
+//            }
+//            override fun onCancelled(error: DatabaseError) {}
+//
+//        })
+    }
+
+    /**
+     * 買い物リストを編集する処理
+     * Firebaseの買い物一覧ノードに保存する
+     */
+    private fun shoppingListEdit(groupMap: Map<String,String>, groupId: String, inventryId: String){
+        val shopMap = HashMap<String,String>()
+        shopMap["buyCount"] = groupMap["count"].toString()
+        shopMap["buyPrice"] = groupMap["price"].toString()
+        shopMap["inventryId"] = inventryId
+        shopRef = databaseReference.child(ShoppingPATH).child(groupId)
+        shopRef.setValue(shopMap)
+        finish()
+    }
+
+    /**
+     * groupNameがキーでgroupIdが値のMapから
+     * 値からキーを取得する処理
+     * @param groupMap: グループ名とグループIDが格納されてあるMap
+     * @param target: グループID
+     */
+    private fun mapGetKey(groupMap: Map<String,String>, target: String):String{
+        for ((key, value) in groupMap)
+        {
+            if (target == value) {
+                return key
+            }
+        }
+        return ""
+    }
+
+    /**
+     * Spinnerの初期値項目を文字列で選択する処理
+     * @param spinner: グループ名または個人が選択できるspinner
+     * @param item: 初期項目を指定する文字列
+     */
+    private fun setSelection(spinner: Spinner, item: String): Int {
+        val adapter = spinner.adapter
+        var index = 0
+        for (i in 0 ..adapter.count -1) {
+            if (adapter.getItem(i) == item) {
+                index = i
+            }
+        }
+        return index
+    }
+
+    private var eventListener = object : ChildEventListener {
+        override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+            val invMap = snapshot.value as Map<*,*>
+            val inventryId = snapshot.key.toString()
+            Log.d("TEST-AAAA",inventryId)
+            if(!inventryId.equals("member")){
+                val shopName = invMap["commodity"] as? String ?: ""
+                if(shopName.equals(inventryName)){
+                    shopRef = databaseReference.child(ShoppingPATH).child(groupIdShoop)
+                    shopListMap["inventryId"] = inventryId
+                    shopRef.setValue(shopListMap)
+                    finish()
+                }
+            }
+        }
+        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
+        override fun onChildRemoved(snapshot: DataSnapshot) {}
+        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+        override fun onCancelled(error: DatabaseError) {}
     }
 }
+// R55QVm4VfVZm3nO2epCzpvnAtPf2

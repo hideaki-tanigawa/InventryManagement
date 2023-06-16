@@ -58,6 +58,8 @@ class Shop:Fragment() {
     override fun onResume() {
         super.onResume()
 
+        shopListPrice = 0
+
         shopListArrayList.clear()
         adapter.setShopListArrayList(shopListArrayList)
         binding.shopListView.adapter = adapter
@@ -90,7 +92,6 @@ class Shop:Fragment() {
             var price = ""
             var count = ""
             for(list in groupList){
-                Log.d("Group-Test",list)
                 if(groupId.equals(list)){
                     val map = snapshot.value as Map<*,*>
                     inventryId = map["inventryId"] as? String ?: ""
@@ -118,15 +119,17 @@ class Shop:Fragment() {
                         }
                     val inventry = Inventry(
                         commodity, price, count, uid, inventryId,
-                        genre, place, date, notice, bytes
+                        genre, place, date, notice, groupId, bytes
                     )
+                    if(!price.equals("")){
+                        val mathPrice = price.toInt()
+                        shopListPrice += mathPrice
 
-                    shopListPrice += price.toInt()
+                        binding.inventryAllPriceText.setText("合計金額："+shopListPrice+"円")
 
-                    binding.inventryAllPriceText.setText("合計金額："+shopListPrice+"円")
-
-                    shopListArrayList.add(inventry)
-                    adapter.notifyDataSetChanged()
+                        shopListArrayList.add(inventry)
+                        adapter.notifyDataSetChanged()
+                    }
 
                     binding.shopListView.setOnItemClickListener{parent, _, position, _ ->
                         // Inventryのインスタンスを渡して質問詳細画面を起動する

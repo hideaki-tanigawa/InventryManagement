@@ -28,7 +28,7 @@ class Person : Fragment() {
     private var param2: String? = null
     private lateinit var _binding : ContentMainBinding
     private val binding get() = _binding!!
-    private val groupExit:Int = 0
+    private var groupId: String = ""
     private lateinit var databaseReference: DatabaseReference
     private lateinit var inventryArrayList: ArrayList<Inventry>
     private lateinit var adapter: InventryListAdapter
@@ -91,6 +91,7 @@ class Person : Fragment() {
                     for(key in data2.keys){
                         val kindName = data2[key] as? String?: ""
                         if(kindName.equals("person")){
+                            groupId = key.toString()
                             displayInventryListInfo(key.toString())
                         }
                     }
@@ -160,7 +161,7 @@ class Person : Fragment() {
 
                 val inventry = Inventry(
                     commodity, price, count, uid, snapshot.key ?: "",
-                    genre, place, date, notice, bytes
+                    genre, place, date, notice, groupId, bytes
                 )
                 inventryArrayList.add(inventry)
                 adapter.notifyDataSetChanged()
