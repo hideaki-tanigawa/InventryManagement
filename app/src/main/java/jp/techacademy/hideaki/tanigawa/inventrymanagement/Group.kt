@@ -329,7 +329,7 @@ class Group:Fragment() {
 
                 val inventry = Inventry(
                     commodity, price, count, uid, snapshot.key ?: "",
-                    genre, place, date, notice, bytes
+                    genre, place, date, notice, groupId, bytes
                 )
                 groupInventryArrayList.add(inventry)
                 invAdapter.notifyDataSetChanged()

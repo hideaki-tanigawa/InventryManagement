@@ -2,6 +2,8 @@ package jp.techacademy.hideaki.tanigawa.inventrymanagement
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
@@ -12,17 +14,21 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ContentMainBinding
+import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ShopMainBinding
+import java.io.ByteArrayOutputStream
 
 class Shop:Fragment() {
-    private lateinit var _binding : ContentMainBinding
+    private lateinit var _binding : ShopMainBinding
     private val binding get() = _binding!!
 
     private lateinit var databaseReference: DatabaseReference
     private lateinit var shopListArrayList: ArrayList<Inventry>
-    private lateinit var adapter: InventryListAdapter
+    private lateinit var adapter: ShopListAdapter
     private lateinit var shopRef: DatabaseReference
     private lateinit var userRef: DatabaseReference
     private lateinit var invRef:DatabaseReference
+    private var shopListPrice = 0
+    private var roopCount = 0
 
     private val groupList = arrayListOf<String>()
 
@@ -31,7 +37,7 @@ class Shop:Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        _binding = ContentMainBinding.inflate(inflater, container, false)
+        _binding = ShopMainBinding.inflate(inflater, container, false)
         val root: View = binding.root
         return root
     }
@@ -39,9 +45,8 @@ class Shop:Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.fab.setOnClickListener{
-            val intent = Intent(context, InventryAdd::class.java)
-            intent.putExtra("shopList",true)
+        binding.shopFab.setOnClickListener{
+            val intent = Intent(context, ShopListAddActivity::class.java)
             startActivity(intent)
         }
 
@@ -49,7 +54,7 @@ class Shop:Fragment() {
         databaseReference = FirebaseDatabase.getInstance().reference
 
         // ListViewの準備
-        adapter = InventryListAdapter(requireContext())
+        adapter = ShopListAdapter(requireContext())
         shopListArrayList = ArrayList()
         adapter.notifyDataSetChanged()
     }
@@ -57,9 +62,11 @@ class Shop:Fragment() {
     override fun onResume() {
         super.onResume()
 
+        shopListPrice = 0
+
         shopListArrayList.clear()
-        adapter.setInventryArrayList(shopListArrayList)
-        binding.listView.adapter = adapter
+        adapter.setShopListArrayList(shopListArrayList)
+        binding.shopListView.adapter = adapter
 
         val userId = FirebaseAuth.getInstance().currentUser!!.uid
         userRef = databaseReference.child(UsersPATH).child(userId)
@@ -89,12 +96,21 @@ class Shop:Fragment() {
             var price = ""
             var count = ""
             for(list in groupList){
-                Log.d("Group-Test",list)
                 if(groupId.equals(list)){
                     val map = snapshot.value as Map<*,*>
-                    inventryId = map["inventryId"] as? String ?: ""
-                    price = map["buyPrice"] as? String ?: ""
-                    count = map["buyCount"] as? String ?: ""
+                    val str = map.keys.toString()
+                    val newStr = str.removePrefix("[")
+                    val dobleStr = newStr.removeSuffix("]")
+                    val inventryIdList = dobleStr.split(", ")
+                    inventryId = inventryIdList[0]
+                    val invMap = map[inventryId] as Map<*,*>
+                    for(list2 in invMap.keys){
+                        if(list2!!.equals("buyPrice")){
+                            price = invMap["buyPrice"] as? String ?: ""
+                        }else{
+                            count = invMap["buyCount"] as? String ?: ""
+                        }
+                    }
                 }
             }
 
@@ -117,13 +133,28 @@ class Shop:Fragment() {
                         }
                     val inventry = Inventry(
                         commodity, price, count, uid, inventryId,
-                        genre, place, date, notice, bytes
+                        genre, place, date, notice, groupId, bytes
                     )
-                    shopListArrayList.add(inventry)
-                    adapter.notifyDataSetChanged()
+                    if(!price.equals("")){
+                        val mathPrice = price.toInt()
+                        shopListPrice += mathPrice
+
+                        binding.inventryAllPriceText.setText("合計金額："+shopListPrice+"円")
+
+                        roopCount++
+                        shopListArrayList.add(inventry)
+                        adapter.notifyDataSetChanged()
+                    }
+
+                    binding.shopListView.setOnItemClickListener{parent, _, position, _ ->
+                        // Inventryのインスタンスを渡して質問詳細画面を起動する
+                        val intent = Intent(context, ShopListAddActivity::class.java)
+                        intent.putExtra("inventry", shopListArrayList[position])
+                        startActivity(intent)
+                    }
 
                     // ListViewを長押しした時の処理
-                    binding.listView.setOnItemLongClickListener{parent, _, position, _ ->
+                    binding.shopListView.setOnItemLongClickListener{parent, _, position, _ ->
                         // 在庫品を削除する
                         val inventry = parent.adapter.getItem(position) as Inventry
 
@@ -136,7 +167,9 @@ class Shop:Fragment() {
                             deleteInventryListInfo(groupId)
                         }
 
-                        builder.setNegativeButton("登録", null)
+                        builder.setNegativeButton("登録"){_, _ ->
+                            registerInventryListInfo(groupId, inventry)
+                        }
 
                         builder.setNeutralButton("キャンセル",null)
 
@@ -165,5 +198,22 @@ class Shop:Fragment() {
         invRef = databaseReference.child(ShoppingPATH).child(groupID)
         invRef!!.removeValue()
         onResume()
+    }
+
+    private fun registerInventryListInfo(groupID: String, inventry: Inventry){
+        Log.d("aaa","qwertyuiop")
+        shopRef = databaseReference.child(ShoppingPATH).child(groupID)
+        invRef = databaseReference.child(InventriesPATH).child(groupID).child(inventry.inventryUid)
+
+        shopRef.removeValue()
+
+        val map = HashMap<String,Any>()
+        map["count"] = inventry.count
+        map["price"] = inventry.price
+        map["shopBoolean"] = "0"
+
+        invRef.updateChildren(map).addOnSuccessListener {
+            onResume()
+        }
     }
 }

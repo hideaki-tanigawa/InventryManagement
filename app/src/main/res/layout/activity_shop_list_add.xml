@@ -9,7 +9,7 @@
     android:paddingRight="16dp"
     android:paddingBottom="16dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".InventryAdd">
+    tools:context=".ShopListAddActivity">
 
     <ScrollView
         android:id="@+id/scrollView"
@@ -22,13 +22,31 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/shopListGroupCorrectWrong"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:text="グループ名または個人"
+                android:textSize="24sp"/>
+
+            <Spinner
+                android:id="@+id/groupNameSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:spinnerMode="dialog"
+                android:layout_marginTop="8dp"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/shopListGroupCorrectWrong"
+                tools:ignore="VisualLintButtonSize"/>
 
             <TextView
                 android:id="@+id/commodityImageText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
+                android:layout_below="@+id/shopListGroupCorrectWrong"
                 android:layout_marginTop="16dp"
                 android:text="@string/add_image_view_label"
                 android:textSize="24sp"/>

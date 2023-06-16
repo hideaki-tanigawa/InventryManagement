@@ -28,7 +28,7 @@ class Person : Fragment() {
     private var param2: String? = null
     private lateinit var _binding : ContentMainBinding
     private val binding get() = _binding!!
-    private val groupExit:Int = 0
+    private var groupId: String = ""
     private lateinit var databaseReference: DatabaseReference
     private lateinit var inventryArrayList: ArrayList<Inventry>
     private lateinit var adapter: InventryListAdapter
@@ -91,6 +91,7 @@ class Person : Fragment() {
                     for(key in data2.keys){
                         val kindName = data2[key] as? String?: ""
                         if(kindName.equals("person")){
+                            groupId = key.toString()
                             displayInventryListInfo(key.toString())
                         }
                     }
@@ -151,6 +152,7 @@ class Person : Fragment() {
                 val place = map["place"] as? String ?: ""
                 val price = map["price"] as? String ?: ""
                 val imageString = map["image"] as? String ?: ""
+                val shopBoolean = map["shopBoolean"] as? String ?: ""
                 val bytes =
                     if (imageString.isNotEmpty()) {
                         Base64.decode(imageString, Base64.DEFAULT)
@@ -160,10 +162,13 @@ class Person : Fragment() {
 
                 val inventry = Inventry(
                     commodity, price, count, uid, snapshot.key ?: "",
-                    genre, place, date, notice, bytes
+                    genre, place, date, notice, groupId, bytes
                 )
-                inventryArrayList.add(inventry)
-                adapter.notifyDataSetChanged()
+
+                if(!shopBoolean.equals("1")){
+                    inventryArrayList.add(inventry)
+                    adapter.notifyDataSetChanged()
+                }
 
                 binding.listView.setOnItemClickListener{ parent, _, position, _ ->
                     // Inventryのインスタンスを渡して質問詳細画面を起動する
@@ -183,6 +188,7 @@ class Person : Fragment() {
 
                     builder.setTitle("削除")
                     builder.setMessage(commodity + "を削除しますか")
+
                     builder.setPositiveButton("OK") {_, _ ->
                         val userID = FirebaseAuth.getInstance().currentUser!!.uid
                         val userRef = databaseReference.child(UsersPATH).child(userID)

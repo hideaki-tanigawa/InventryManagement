@@ -12,6 +12,7 @@ class Inventry(
     val place: String,
     val date: String,
     val notice: String,
+    val groupId: String,
     bytes: ByteArray,
 ) : Serializable {
     val imageBytes: ByteArray
