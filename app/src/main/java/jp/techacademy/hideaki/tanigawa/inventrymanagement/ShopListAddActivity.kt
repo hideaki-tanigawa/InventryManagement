@@ -438,22 +438,10 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
         inviteRef = databaseReference.child(InventriesPATH).child(groupId)
         inviteRef.push().setValue(groupMap)
 
-
         groupIdShoop = groupId
         inviteRef.addChildEventListener(eventListener)
 
         Log.d("TEST",inviteRef.key.toString())
-
-//        inviteRef.addListenerForSingleValueEvent(object : ValueEventListener{
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                val inventryUid = snapshot.key.toString()
-//                val invMap = snapshot.value as Map<*,*>
-//                Log.d("TEST",invMap.keys.toString())
-//                finish()
-//            }
-//            override fun onCancelled(error: DatabaseError) {}
-//
-//        })
     }
 
     /**
@@ -464,8 +452,7 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
         val shopMap = HashMap<String,String>()
         shopMap["buyCount"] = groupMap["count"].toString()
         shopMap["buyPrice"] = groupMap["price"].toString()
-        shopMap["inventryId"] = inventryId
-        shopRef = databaseReference.child(ShoppingPATH).child(groupId)
+        shopRef = databaseReference.child(ShoppingPATH).child(groupId).child(inventryId)
         shopRef.setValue(shopMap)
         finish()
     }
@@ -510,8 +497,7 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
             if(!inventryId.equals("member")){
                 val shopName = invMap["commodity"] as? String ?: ""
                 if(shopName.equals(inventryName)){
-                    shopRef = databaseReference.child(ShoppingPATH).child(groupIdShoop)
-                    shopListMap["inventryId"] = inventryId
+                    shopRef = databaseReference.child(ShoppingPATH).child(groupIdShoop).child(inventryId)
                     shopRef.setValue(shopListMap)
                     finish()
                 }

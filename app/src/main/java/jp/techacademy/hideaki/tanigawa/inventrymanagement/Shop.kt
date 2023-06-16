@@ -2,6 +2,8 @@ package jp.techacademy.hideaki.tanigawa.inventrymanagement
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
@@ -13,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ContentMainBinding
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ShopMainBinding
+import java.io.ByteArrayOutputStream
 
 class Shop:Fragment() {
     private lateinit var _binding : ShopMainBinding
@@ -25,6 +28,7 @@ class Shop:Fragment() {
     private lateinit var userRef: DatabaseReference
     private lateinit var invRef:DatabaseReference
     private var shopListPrice = 0
+    private var roopCount = 0
 
     private val groupList = arrayListOf<String>()
 
@@ -94,9 +98,19 @@ class Shop:Fragment() {
             for(list in groupList){
                 if(groupId.equals(list)){
                     val map = snapshot.value as Map<*,*>
-                    inventryId = map["inventryId"] as? String ?: ""
-                    price = map["buyPrice"] as? String ?: ""
-                    count = map["buyCount"] as? String ?: ""
+                    val str = map.keys.toString()
+                    val newStr = str.removePrefix("[")
+                    val dobleStr = newStr.removeSuffix("]")
+                    val inventryIdList = dobleStr.split(", ")
+                    inventryId = inventryIdList[0]
+                    val invMap = map[inventryId] as Map<*,*>
+                    for(list2 in invMap.keys){
+                        if(list2!!.equals("buyPrice")){
+                            price = invMap["buyPrice"] as? String ?: ""
+                        }else{
+                            count = invMap["buyCount"] as? String ?: ""
+                        }
+                    }
                 }
             }
 
@@ -127,6 +141,7 @@ class Shop:Fragment() {
 
                         binding.inventryAllPriceText.setText("合計金額："+shopListPrice+"円")
 
+                        roopCount++
                         shopListArrayList.add(inventry)
                         adapter.notifyDataSetChanged()
                     }
@@ -152,7 +167,9 @@ class Shop:Fragment() {
                             deleteInventryListInfo(groupId)
                         }
 
-                        builder.setNegativeButton("登録", null)
+                        builder.setNegativeButton("登録"){_, _ ->
+                            registerInventryListInfo(groupId, inventry)
+                        }
 
                         builder.setNeutralButton("キャンセル",null)
 
@@ -181,5 +198,22 @@ class Shop:Fragment() {
         invRef = databaseReference.child(ShoppingPATH).child(groupID)
         invRef!!.removeValue()
         onResume()
+    }
+
+    private fun registerInventryListInfo(groupID: String, inventry: Inventry){
+        Log.d("aaa","qwertyuiop")
+        shopRef = databaseReference.child(ShoppingPATH).child(groupID)
+        invRef = databaseReference.child(InventriesPATH).child(groupID).child(inventry.inventryUid)
+
+        shopRef.removeValue()
+
+        val map = HashMap<String,Any>()
+        map["count"] = inventry.count
+        map["price"] = inventry.price
+        map["shopBoolean"] = "0"
+
+        invRef.updateChildren(map).addOnSuccessListener {
+            onResume()
+        }
     }
 }

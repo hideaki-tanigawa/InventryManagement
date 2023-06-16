@@ -155,7 +155,6 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
                 val shopMap = HashMap<String,String>()
                 shopMap["buyCount"] = "1"
                 shopMap["buyPrice"] = price.toString()
-                shopMap["inventryId"] = inventry.inventryUid
 
                 userRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
@@ -164,7 +163,7 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
                         for(key in data2.keys){
                             val kindName = data2[key] as? String?: ""
                             if(kindName.equals(groupKindName)){
-                                val shopRef = dataBaseReference.child(ShoppingPATH).child(key.toString())
+                                val shopRef = dataBaseReference.child(ShoppingPATH).child(key.toString()).child(inventry.inventryUid)
                                 shopRef.setValue(shopMap)
                                 Toast.makeText(this@InventryAdd, "この在庫品を買い物リストに追加いたしました", Toast.LENGTH_LONG).show()
                             }

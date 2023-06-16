@@ -152,6 +152,7 @@ class Person : Fragment() {
                 val place = map["place"] as? String ?: ""
                 val price = map["price"] as? String ?: ""
                 val imageString = map["image"] as? String ?: ""
+                val shopBoolean = map["shopBoolean"] as? String ?: ""
                 val bytes =
                     if (imageString.isNotEmpty()) {
                         Base64.decode(imageString, Base64.DEFAULT)
@@ -163,8 +164,11 @@ class Person : Fragment() {
                     commodity, price, count, uid, snapshot.key ?: "",
                     genre, place, date, notice, groupId, bytes
                 )
-                inventryArrayList.add(inventry)
-                adapter.notifyDataSetChanged()
+
+                if(!shopBoolean.equals("1")){
+                    inventryArrayList.add(inventry)
+                    adapter.notifyDataSetChanged()
+                }
 
                 binding.listView.setOnItemClickListener{ parent, _, position, _ ->
                     // Inventryのインスタンスを渡して質問詳細画面を起動する
