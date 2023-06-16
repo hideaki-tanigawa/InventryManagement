@@ -28,14 +28,18 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
+import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ActivityInventryAddBinding
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -349,6 +353,7 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
     /**
      * Firebaseに登録する処理
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun registerInventryInfo(groupID: String, userID: String){
         val dataBaseReference = FirebaseDatabase.getInstance().reference
 
@@ -411,6 +416,7 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
         if(moveBoolean == true){
             genreRef.setValue(data, this)
         }else{
+            saveInventryUniqe(groupID, title, genre)
             genreRef.push().setValue(data, this)
         }
         binding.progressBar.visibility = View.VISIBLE
@@ -447,5 +453,26 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
         calendar.time = simpleDateFormat.parse(inventry.date) as Date
 
         setDateTimeButtonText()
+    }
+
+
+    /**
+     * 在庫を登録した日付をPreferenceに保存
+     * @param groupID グループID
+     * @param commodity 商品名
+     * @param genre ジャンル
+     * @param date 1個あたりの消費日
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun saveInventryUniqe(groupID: String, commodity: String, genre: String) {
+        val currentDate = LocalDate.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+        val date = currentDate.format(formatter)
+        // Preferenceに保存する
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+        val editor = sp.edit()
+        val nameKey = groupID + commodity + genre
+        editor.putString(nameKey, date)
+        editor.apply()
     }
 }

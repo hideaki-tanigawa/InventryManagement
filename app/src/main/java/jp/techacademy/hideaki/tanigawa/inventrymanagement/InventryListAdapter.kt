@@ -11,12 +11,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import androidx.annotation.RequiresApi
+import androidx.preference.PreferenceManager
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ListInventryBinding
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import kotlin.coroutines.coroutineContext
 
 class InventryListAdapter(context: Context) : BaseAdapter() {
+    val context:Context = context
     private var layoutInflater: LayoutInflater
     private var inventryArrayList = ArrayList<Inventry>()
 
@@ -46,12 +49,22 @@ class InventryListAdapter(context: Context) : BaseAdapter() {
         }
         val view: View = convertView ?: binding.root
 
+        val groupId = inventryArrayList[position].groupId
+        val commodity = inventryArrayList[position].commodity
+        val genre = inventryArrayList[position].genre
+
         binding.inventryTitleText.text = inventryArrayList[position].commodity
         binding.inventryCountText.text = inventryArrayList[position].count
         val date1 = LocalDate.now()
         val invDate = inventryArrayList[position].date.split("/")
         val date2 = LocalDate.of(invDate[0].toInt(),invDate[1].toInt(),invDate[2].toInt())
         val increment = ChronoUnit.DAYS.between(date1,date2)
+        if (increment.toInt() == 0){
+            binding.consumptionUnitText.text = increment.toString()
+        }else{
+            dateDiff(groupId,commodity,genre)
+            binding.consumptionUnitText.text = increment.toString()
+        }
         binding.consumptionUnitText.text = increment.toString()
         if(increment <= 5){
             binding.consumptionUnitText.setTextColor(Color.parseColor("#FF0000"))
@@ -69,5 +82,18 @@ class InventryListAdapter(context: Context) : BaseAdapter() {
 
     fun setInventryArrayList(inventryArrayList: ArrayList<Inventry>) {
         this.inventryArrayList = inventryArrayList
+    }
+
+    /**
+     * 在庫登録した日とどれだけ差分があるのか
+     * @param groupId グループID
+     * @param commodity 在庫名
+     * @param genre ジャンル
+     */
+    private fun dateDiff(groupId:String, commodity:String, genre:String){
+        val sp = PreferenceManager.getDefaultSharedPreferences(context)
+        val uniqueKey = groupId + commodity + genre
+        val name = sp.getString(uniqueKey, "")
+        Log.d("SSSSSS",name.toString())
     }
 }
