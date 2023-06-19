@@ -34,6 +34,7 @@ class Group:Fragment() {
     private var groupKindName = ""
     private var item: MenuItem? = null
     private var item2: MenuItem? = null
+    private var invCount: Int = 0
 
     private lateinit var databaseReference: DatabaseReference
     private lateinit var groupArrayList: ArrayList<GroupList>
@@ -54,6 +55,8 @@ class Group:Fragment() {
                 groupListRef = databaseReference.child(InventriesPATH).child(groupID)
                 groupListRef.addListenerForSingleValueEvent(object : ValueEventListener{
                     override fun onDataChange(datasnapshot: DataSnapshot) {
+                        invCount = 1
+                        displayTextView(invCount)
                         val map = datasnapshot.value as Map<*,*>
                         val groupName = map["groupName"] as? String ?: ""
 
@@ -97,6 +100,7 @@ class Group:Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        displayTextView(invCount)
 
         // Firebase
         databaseReference = FirebaseDatabase.getInstance().reference
@@ -233,6 +237,7 @@ class Group:Fragment() {
 
     override fun onResume() {
         super.onResume()
+        invCount = 0
         binding.groupFab.visibility = View.GONE
 
         users = getLoginBoolean()
@@ -250,6 +255,8 @@ class Group:Fragment() {
 
         // グループリストがタップされた時に発火
         binding.groupListView.setOnItemClickListener{ _, _, position, _ ->
+            invCount = 0
+            displayTextView(invCount)
             binding.groupFab.visibility = View.VISIBLE
             requireActivity().setTitle("在庫一覧(グループ)")
 
@@ -310,9 +317,12 @@ class Group:Fragment() {
     private val groupInventryeventListener = object : ChildEventListener {
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
             if(!snapshot.key.toString().equals("groupName") && !snapshot.key.toString().equals("member")){
+                invCount = 1
+                displayTextView(invCount)
                 val map = snapshot.value as Map<*,*>
+                Log.d("在庫情報",snapshot.value.toString())
                 val commodity = map["commodity"] as? String ?: ""
-                val count = map["count"] as? String ?: ""
+                val count = map["count"].toString()
                 val uid = map["uid"] as? String ?: ""
                 val date = map["date"] as? String ?: ""
                 val genre = map["genre"] as? String ?: ""
@@ -320,6 +330,7 @@ class Group:Fragment() {
                 val place = map["place"] as? String ?: ""
                 val price = map["price"] as? String ?: ""
                 val imageString = map["image"] as? String ?: ""
+                Log.d("COUNt",count)
                 val bytes =
                     if (imageString.isNotEmpty()) {
                         Base64.decode(imageString, Base64.DEFAULT)
@@ -362,5 +373,18 @@ class Group:Fragment() {
         val memberInviteRef = databaseReference.child("invite").child(receiveId).child(groupID)
 
         memberInviteRef.setValue(userID)
+    }
+
+    /**
+     * 在庫が登録されているかによってTextViewを表示させるか
+     * 判断する処理
+     * @param invCount 在庫数
+     */
+    private fun displayTextView(invCount: Int){
+        if(invCount == 0){
+            binding.noInventoryListText.visibility = View.VISIBLE
+        }else{
+            binding.noInventoryListText.visibility = View.GONE
+        }
     }
 }

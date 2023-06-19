@@ -2,18 +2,12 @@ package jp.techacademy.hideaki.tanigawa.inventrymanagement
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.view.*
-import androidx.core.graphics.BlendModeColorFilterCompat
-import androidx.core.graphics.BlendModeCompat
-import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import com.google.firebase.auth.FirebaseAuth
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ContentMainBinding
 import android.util.Base64
-import android.util.Log
 import com.google.firebase.database.*
 
 // TODO: Rename parameter arguments, choose names that match
@@ -29,6 +23,7 @@ class Person : Fragment() {
     private lateinit var _binding : ContentMainBinding
     private val binding get() = _binding!!
     private var groupId: String = ""
+    private var invCount: Int = 0
     private lateinit var databaseReference: DatabaseReference
     private lateinit var inventryArrayList: ArrayList<Inventry>
     private lateinit var adapter: InventryListAdapter
@@ -75,6 +70,7 @@ class Person : Fragment() {
     override fun onResume() {
         super.onResume()
         users = getLoginBoolean()
+        invCount = 0
 
         // ListViewの準備
         adapter = InventryListAdapter(requireContext())
@@ -82,6 +78,9 @@ class Person : Fragment() {
         adapter.notifyDataSetChanged()
 
         if(!users){
+            userHaveGroupIdStorage(requireContext())
+            displayTextView(invCount)
+
             val userID = FirebaseAuth.getInstance().currentUser!!.uid
             val userRef = databaseReference.child(UsersPATH).child(userID)
             userRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -142,9 +141,11 @@ class Person : Fragment() {
     private val eventListener = object : ChildEventListener {
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
             if(!snapshot.key.toString().equals("member")){
+                invCount = 1
+                displayTextView(invCount)
                 val map = snapshot.value as Map<*,*>
                 val commodity = map["commodity"] as? String ?: ""
-                val count = map["count"] as? String ?: ""
+                val count = map["count"].toString()
                 val uid = map["uid"] as? String ?: ""
                 val date = map["date"] as? String ?: ""
                 val genre = map["genre"] as? String ?: ""
@@ -251,5 +252,18 @@ class Person : Fragment() {
         binding.listView.adapter = adapter
         invRef = databaseReference.child(InventriesPATH).child(groupID)
         invRef!!.addChildEventListener(eventListener)
+    }
+
+    /**
+     * 在庫が登録されているかによってTextViewを表示させるか
+     * 判断する処理
+     * @param invCount 在庫数
+     */
+    private fun displayTextView(invCount: Int){
+        if(invCount == 0){
+            binding.noInventoryListText.visibility = View.VISIBLE
+        }else{
+            binding.noInventoryListText.visibility = View.GONE
+        }
     }
 }

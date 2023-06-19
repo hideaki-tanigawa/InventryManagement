@@ -2,6 +2,7 @@ package jp.techacademy.hideaki.tanigawa.inventrymanagement
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import android.view.MenuItem
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -9,6 +10,10 @@ import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -105,21 +110,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     /**
      * ユーザーがログインしているかどうかを判定する関数
      */
-    private fun getLoginBoolean():Boolean{
+    private fun getLoginBoolean():Boolean {
         // ログイン済みのユーザーを取得する
         val user = FirebaseAuth.getInstance().currentUser
         // ログイン済み：False、ログインしていない：True
-        if(user == null){
+        if (user == null) {
             return true
-        }else{
+        } else {
             return false
         }
-    }
-
-    /**
-     * Fragmentのアクションバーのタイトルの変えための関数
-     */
-    public fun setActionBarTitle(titles: String){
-        title = titles
     }
 }

@@ -29,6 +29,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/groupInventrySearch" />
 
+    <TextView
+        android:id="@+id/noInventoryListText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="在庫は登録されておりません"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/groupFab"
         android:layout_width="wrap_content"
