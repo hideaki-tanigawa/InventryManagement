@@ -24,7 +24,7 @@ private var inventoryIdArrayList = ArrayList<String>()
  * 在庫数が減る毎に通知する処理
  * @param context コンテキスト
  */
-fun countEachNotificationChannel(context: Context){
+fun countEachNotificationChannel(context: Context, commodity: String){
     // チャンネルをシステムに登録する
     val notificationManager: NotificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -42,7 +42,7 @@ fun countEachNotificationChannel(context: Context){
     var builder = NotificationCompat.Builder(context, CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_notification_icon)
         .setContentTitle("在庫管理アプリ")
-        .setContentText("在庫が一つ減りました。")
+        .setContentText(commodity + "が一つ減りました。")
         .setPriority(NOTIFICATION_PRIORITY)
 
     // 通知を表示
@@ -53,7 +53,7 @@ fun countEachNotificationChannel(context: Context){
  * 在庫数が残り1つになると通知する処理
  * @param context コンテキスト
  */
-fun countOneNotificationChannel(context: Context){
+fun countOneNotificationChannel(context: Context, commodity: String){
     // チャンネルをシステムに登録する
     val notificationManager: NotificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -71,7 +71,7 @@ fun countOneNotificationChannel(context: Context){
     var builder = NotificationCompat.Builder(context, CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_notification_icon)
         .setContentTitle("在庫管理アプリ")
-        .setContentText("在庫が残り１つです。")
+        .setContentText(commodity + "が残り１つです。")
         .setPriority(NOTIFICATION_PRIORITY)
 
     // 通知を表示
@@ -82,7 +82,7 @@ fun countOneNotificationChannel(context: Context){
  * 在庫数が残り2つになると通知する処理
  * @param context コンテキスト
  */
-fun countTwoNotificationChannel(context: Context){
+fun countTwoNotificationChannel(context: Context, commodity: String){
     // チャンネルをシステムに登録する
     val notificationManager: NotificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -100,7 +100,7 @@ fun countTwoNotificationChannel(context: Context){
     var builder = NotificationCompat.Builder(context, CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_notification_icon)
         .setContentTitle("在庫管理アプリ")
-        .setContentText("在庫が残り２つです。")
+        .setContentText(commodity + "が残り２つです。")
         .setPriority(NOTIFICATION_PRIORITY)
 
     // 通知を表示
@@ -111,7 +111,7 @@ fun countTwoNotificationChannel(context: Context){
  * 在庫数が残り3つになると通知する処理
  * @param context コンテキスト
  */
-fun countThreeNotificationChannel(context: Context){
+fun countThreeNotificationChannel(context: Context, commodity: String){
     // チャンネルをシステムに登録する
     val notificationManager: NotificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -129,7 +129,7 @@ fun countThreeNotificationChannel(context: Context){
     var builder = NotificationCompat.Builder(context, CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_notification_icon)
         .setContentTitle("在庫管理アプリ")
-        .setContentText("在庫が残り３つです。")
+        .setContentText(commodity + "が残り３つです。")
         .setPriority(NOTIFICATION_PRIORITY)
 
     // 通知を表示
@@ -235,12 +235,12 @@ private fun notificationChoice(invInfoArrayList: ArrayList<String>, context: Con
     }
     val count = invInfoArrayList[2].toInt()
 
-    if(invInfoArrayList[3].equals("0") && count == 1){
-        countTwoNotificationChannel(context)
+    if(invInfoArrayList[3].equals("2") && count == 2){
+        countTwoNotificationChannel(context, invInfoArrayList[1])
     }else if (invInfoArrayList[3].equals("1") && count == 1){
-        countOneNotificationChannel(context)
-    }else if (invInfoArrayList[3].equals("0") && count == 3){
-        countThreeNotificationChannel(context)
+        countOneNotificationChannel(context, invInfoArrayList[1])
+    }else if (invInfoArrayList[3].equals("3") && count == 3){
+        countThreeNotificationChannel(context, invInfoArrayList[1])
     }
     inventoryInfoArrayList.clear()
 }
@@ -250,3 +250,5 @@ private fun groupNameInventoryIdStorage(inventoryIdList: ArrayList<String>){
         Log.d("在庫管理",inventoryIdList[index])
     }
 }
+
+

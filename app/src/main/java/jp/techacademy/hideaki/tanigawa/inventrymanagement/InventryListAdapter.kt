@@ -71,6 +71,8 @@ class InventryListAdapter(context: Context) : BaseAdapter() {
                 invCount = invCount - 1
             }
 
+            countEachNotificationChannel(context, commodity)
+
             if(invCount > 0){
                 dateIncrement = dateDiff(groupId,commodity,genre,invetoryId,date2,invCount)
                 binding.consumptionUnitText.text = dateIncrement
