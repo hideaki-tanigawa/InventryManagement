@@ -79,6 +79,7 @@ class Person : Fragment() {
 
         if(!users){
             userHaveGroupIdStorage(requireContext())
+            userEachGroupIdSendIdStorage(requireContext())
             displayTextView(invCount)
 
             val userID = FirebaseAuth.getInstance().currentUser!!.uid
