@@ -43,7 +43,7 @@
     <string name="add_commodity_count_Number">個</string>
     <string name="add_commodity_genre">ジャンル</string>
     <string name="add_commodity_genre_case">例：食品、日用品</string>
-    <string name="add_commodity_spending">1日あたりの消費日</string>
+    <string name="add_commodity_spending">1個あたりの消耗期日</string>
     <string name="add_commodity_date">----年--月--日</string>
     <string name="add_commodity_date_change_button">日付の変更</string>
     <string name="add_commodity_place">置き場所</string>

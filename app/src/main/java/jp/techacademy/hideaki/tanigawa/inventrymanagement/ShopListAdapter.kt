@@ -3,21 +3,17 @@ package jp.techacademy.hideaki.tanigawa.inventrymanagement
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import androidx.annotation.RequiresApi
-import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ListInventryBinding
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ListShopMemoBinding
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 class ShopListAdapter(context: Context) : BaseAdapter()  {
     private var layoutInflater: LayoutInflater
-    private var shopListArrayList = ArrayList<Inventry>()
+    private var shopListArrayList = ArrayList<ShopInventory>()
 
     init {
         layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -58,7 +54,7 @@ class ShopListAdapter(context: Context) : BaseAdapter()  {
         return view
     }
 
-    fun setShopListArrayList(shopListArrayList: ArrayList<Inventry>) {
+    fun setShopListArrayList(shopListArrayList: ArrayList<ShopInventory>) {
         this.shopListArrayList = shopListArrayList
     }
 }
