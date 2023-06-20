@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ContentMainBinding
 import android.util.Base64
+import android.util.Log
+import androidx.appcompat.widget.SearchView
 import com.google.firebase.database.*
 
 // TODO: Rename parameter arguments, choose names that match
@@ -26,8 +28,11 @@ class Person : Fragment() {
     private var invCount: Int = 0
     private lateinit var databaseReference: DatabaseReference
     private lateinit var inventryArrayList: ArrayList<Inventry>
+    private lateinit var searchInventory: ArrayList<Inventry>
     private lateinit var adapter: InventryListAdapter
     private var users:Boolean = true
+    private var searchCount = 0
+    private var strQuery: String = ""
 
     private var invRef: DatabaseReference? = null
 
@@ -63,14 +68,31 @@ class Person : Fragment() {
             }
         }
 
+        binding.inventrySearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
+            android.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                strQuery = query!!
+                searchCount = 1
+//                refinedSearch(strQuery!!)
+//                searchCount = 0
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        })
+
         // Firebase
         databaseReference = FirebaseDatabase.getInstance().reference
+        searchInventory = ArrayList()
     }
 
     override fun onResume() {
         super.onResume()
         users = getLoginBoolean()
         invCount = 0
+//        searchCount = 0
 
         // ListViewの準備
         adapter = InventryListAdapter(requireContext())
@@ -168,8 +190,15 @@ class Person : Fragment() {
                 )
 
                 if(!shopBoolean.equals("1")){
-                    inventryArrayList.add(inventry)
-                    adapter.notifyDataSetChanged()
+                    if(searchCount == 1 ){
+                        if(commodity.equals(strQuery) || genre.equals(strQuery) || place.equals(strQuery)){
+                            inventryArrayList.add(inventry)
+                            adapter.notifyDataSetChanged()
+                        }
+                    }else{
+                        inventryArrayList.add(inventry)
+                        adapter.notifyDataSetChanged()
+                    }
                 }
 
                 binding.listView.setOnItemClickListener{ parent, _, position, _ ->
@@ -266,5 +295,41 @@ class Person : Fragment() {
         }else{
             binding.noInventoryListText.visibility = View.GONE
         }
+    }
+
+    /**
+     * 在庫リストを絞り込む処理
+     */
+    private fun refinedSearch(query: String){
+
+        Log.d("配列数", searchInventory.size.toString())
+        if(searchInventory.size == 1){
+            if(searchInventory[0].commodity.equals(query)){
+                Log.d("在庫名",query)
+                inventryArrayList.add(searchInventory[0])
+                adapter.notifyDataSetChanged()
+            }else if(searchInventory[0].genre.equals(query)){
+                inventryArrayList.add(searchInventory[0])
+                adapter.notifyDataSetChanged()
+            }else if(searchInventory[0].place.equals(query)){
+                inventryArrayList.add(searchInventory[0])
+                adapter.notifyDataSetChanged()
+            }
+        }else{
+            for(count in 0..searchInventory.size - 1){
+                if(searchInventory[count].commodity.equals(query)){
+                    inventryArrayList.add(searchInventory[count])
+                    adapter.notifyDataSetChanged()
+                }else if(searchInventory[count].genre.equals(query)){
+                    inventryArrayList.add(searchInventory[count])
+                    adapter.notifyDataSetChanged()
+                }else if(searchInventory[count].place.equals(query)){
+                    inventryArrayList.add(searchInventory[count])
+                    adapter.notifyDataSetChanged()
+                }
+            }
+        }
+
+        searchCount++
     }
 }

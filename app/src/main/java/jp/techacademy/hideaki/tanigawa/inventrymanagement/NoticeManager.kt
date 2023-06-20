@@ -244,7 +244,7 @@ private fun groupIdInventoryCountStorage(groupIdArrayList: ArrayList<String>, co
  */
 private fun notificationChoice(invInfoArrayList: ArrayList<String>, context: Context) {
     for(count in 0..invInfoArrayList.size - 1){
-//        Log.d("これっていける",invInfoArrayList[count])
+        Log.d("これっていける",invInfoArrayList[count])
     }
     val count = invInfoArrayList[2].toInt()
 
