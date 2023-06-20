@@ -26,7 +26,7 @@ private var inviteSendIdArrayList = ArrayList<String>()
  * 在庫数が減る毎に通知する処理
  * @param context コンテキスト
  */
-fun countEachNotificationChannel(context: Context, commodity: String){
+fun countEachNotificationChannel(context: Context, commodity: String, count: String){
     // チャンネルをシステムに登録する
     val notificationManager: NotificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -44,7 +44,7 @@ fun countEachNotificationChannel(context: Context, commodity: String){
     var builder = NotificationCompat.Builder(context, CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_notification_icon)
         .setContentTitle("在庫管理アプリ")
-        .setContentText(commodity + "が一つ減りました。")
+        .setContentText(commodity + "が一つ減りました。\n現在の在庫数は" + count + "個です。")
         .setPriority(NOTIFICATION_PRIORITY)
 
     // 通知を表示
@@ -244,7 +244,7 @@ private fun groupIdInventoryCountStorage(groupIdArrayList: ArrayList<String>, co
  */
 private fun notificationChoice(invInfoArrayList: ArrayList<String>, context: Context) {
     for(count in 0..invInfoArrayList.size - 1){
-//        Log.d("これっていける",invInfoArrayList[count])
+        Log.d("これっていける",invInfoArrayList[count])
     }
     val count = invInfoArrayList[2].toInt()
 

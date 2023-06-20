@@ -19,6 +19,7 @@ import android.provider.MediaStore
 import android.text.Selection.setSelection
 import android.util.Base64
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
@@ -44,7 +45,7 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
     private lateinit var databaseReference: DatabaseReference
     private lateinit var inviteRef: DatabaseReference
     private lateinit var shopRef: DatabaseReference
-    private lateinit var inventry: Inventry
+    private lateinit var inventry: ShopInventory
     private var inventryName = ""
     private var moveBoolean: Boolean = false
     private var pictureUri: Uri? = null
@@ -68,9 +69,9 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
         try {
             @Suppress("UNCHECKED_CAST", "DEPRECATION", "DEPRECATED_SYNTAX_WITH_DEFINITELY_NOT_NULL")
             inventry = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                intent.getSerializableExtra("inventry", Inventry::class.java)!!
+                intent.getSerializableExtra("inventry", ShopInventory::class.java)!!
             else
-                (intent.getSerializableExtra("inventry") as? Inventry)!!
+                (intent.getSerializableExtra("inventry") as? ShopInventory)!!
 
             moveBoolean = true
         }catch (e: NullPointerException){
@@ -83,10 +84,14 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
         binding.commodityImage.setOnClickListener(this)
         binding.dateButton.setOnClickListener(this)
 
+         Log.d("Test",moveBoolean.toString())
+
         // 在庫作成画面の要素に値を代入する
         if(moveBoolean){
             assignmentValue(inventry)
         }
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // Firebase
         databaseReference = FirebaseDatabase.getInstance().reference
@@ -115,6 +120,17 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
         spinner.setSelection(noticeNo)
 
         getuserHaveGropId()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                Log.d("return","戻る")
+                finish()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     /**
@@ -326,7 +342,7 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
      * 要素を代入する処理
      * @param inventry: 買い物リストの商品情報
      */
-    private fun assignmentValue(inventry: Inventry){
+    private fun assignmentValue(inventry: ShopInventory){
         val bytes = inventry.imageBytes
         if (bytes.isNotEmpty()) {
             val image = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)

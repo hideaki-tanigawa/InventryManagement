@@ -55,7 +55,8 @@ class InventryListAdapter(context: Context) : BaseAdapter() {
         val genre = inventryArrayList[position].genre
         val count = inventryArrayList[position].count
         val invetoryId = inventryArrayList[position].inventryUid
-//        Log.d("COUNT",count)
+        val notice = inventryArrayList[position].notice
+        Log.d("COUNT",count)
         var invCount = count.toInt()
 
         binding.inventryTitleText.text = commodity
@@ -71,7 +72,11 @@ class InventryListAdapter(context: Context) : BaseAdapter() {
                 invCount = invCount - 1
             }
 
-            countEachNotificationChannel(context, commodity)
+            if(notice.equals("0")){
+                countEachNotificationChannel(context, commodity, count)
+            }
+
+            Log.d("確認あああ",invCount.toString())
 
             if(invCount > 0){
                 dateIncrement = dateDiff(groupId,commodity,genre,invetoryId,date2,invCount)
@@ -125,7 +130,7 @@ class InventryListAdapter(context: Context) : BaseAdapter() {
         val sp = PreferenceManager.getDefaultSharedPreferences(context)
         val uniqueKey = groupId + commodity + genre
         val date = sp.getString(uniqueKey, "")
-//        Log.d("SSSSSS",date.toString())
+        Log.d("SSSSSS",date.toString())
 //        val date = "2023/6/1"
         var increment: Long = 0
 
