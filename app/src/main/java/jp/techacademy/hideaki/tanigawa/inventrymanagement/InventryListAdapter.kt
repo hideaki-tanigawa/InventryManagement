@@ -67,13 +67,13 @@ class InventryListAdapter(context: Context) : BaseAdapter() {
         val increment = ChronoUnit.DAYS.between(date1,date2)
         var dateIncrement = ""
 
-        if(notice.equals("0")){
-            countEachNotificationChannel(context, commodity, count)
-        }
-
         if (increment.toInt() == 0 || invCount == 0){
             if(invCount > 0){
                 invCount = invCount - 1
+            }
+
+            if(notice.equals("0")){
+                countEachNotificationChannel(context, commodity, count)
             }
 
             Log.d("確認あああ",invCount.toString())

@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.google.firebase.auth.FirebaseAuth
@@ -20,6 +21,7 @@ class Shop:Fragment() {
 
     private lateinit var databaseReference: DatabaseReference
     private lateinit var shopListArrayList: ArrayList<ShopInventory>
+    private lateinit var searchInventory: ArrayList<ShopInventory>
     private lateinit var adapter: ShopListAdapter
     private lateinit var shopRef: DatabaseReference
     private lateinit var userRef: DatabaseReference
@@ -27,6 +29,7 @@ class Shop:Fragment() {
     private var shopListPrice = 0
     private var roopCount = 0
     private var invCount: Int = 0
+    private var strQuery: String = ""
 
     private val groupList = arrayListOf<String>()
 
@@ -55,6 +58,22 @@ class Shop:Fragment() {
         adapter = ShopListAdapter(requireContext())
         shopListArrayList = ArrayList()
         adapter.notifyDataSetChanged()
+
+        binding.groupInventrySearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
+            android.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                strQuery = query!!
+//                searchCount = 1
+                refinedSearch(strQuery)
+//                searchCount = 0
+                return true
+            }
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        })
+
+        searchInventory = ArrayList()
     }
 
     override fun onResume() {
@@ -238,5 +257,48 @@ class Shop:Fragment() {
         }else{
             binding.noInventoryListText.visibility = View.GONE
         }
+    }
+
+    /**
+     * 在庫リストを絞り込む処理
+     * @param query 検索ワード
+     */
+    private fun refinedSearch(query: String){
+        searchInventory = shopListArrayList.clone() as ArrayList<ShopInventory>
+
+        shopListArrayList.clear()
+        // 在庫のリストをクinventryArrayList.clear()
+        adapter.setShopListArrayList(shopListArrayList)
+        binding.shopListView.adapter = adapter
+
+        Log.d("配列数", searchInventory.size.toString())
+        if(searchInventory.size == 1){
+            if(searchInventory[0].commodity.equals(query)){
+                Log.d("在庫名",query)
+                shopListArrayList.add(searchInventory[0])
+                adapter.notifyDataSetChanged()
+            }else if(searchInventory[0].genre.equals(query)){
+                shopListArrayList.add(searchInventory[0])
+                adapter.notifyDataSetChanged()
+            }else if(searchInventory[0].place.equals(query)){
+                shopListArrayList.add(searchInventory[0])
+                adapter.notifyDataSetChanged()
+            }
+        }else{
+            for(count in 0..searchInventory.size - 1){
+                if(searchInventory[count].commodity.equals(query)){
+                    shopListArrayList.add(searchInventory[count])
+                    adapter.notifyDataSetChanged()
+                }else if(searchInventory[count].genre.equals(query)){
+                    shopListArrayList.add(searchInventory[count])
+                    adapter.notifyDataSetChanged()
+                }else if(searchInventory[count].place.equals(query)){
+                    shopListArrayList.add(searchInventory[count])
+                    adapter.notifyDataSetChanged()
+                }
+            }
+        }
+
+//        searchCount++
     }
 }
