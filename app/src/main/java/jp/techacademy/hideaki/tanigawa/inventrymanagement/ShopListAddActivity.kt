@@ -19,6 +19,7 @@ import android.provider.MediaStore
 import android.text.Selection.setSelection
 import android.util.Base64
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
@@ -88,6 +89,8 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
             assignmentValue(inventry)
         }
 
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
         // Firebase
         databaseReference = FirebaseDatabase.getInstance().reference
     }
@@ -115,6 +118,17 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
         spinner.setSelection(noticeNo)
 
         getuserHaveGropId()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                Log.d("return","戻る")
+                finish()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     /**
