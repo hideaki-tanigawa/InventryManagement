@@ -151,6 +151,7 @@ class Shop:Fragment() {
 
                     binding.shopListView.setOnItemClickListener{parent, _, position, _ ->
                         // Inventryのインスタンスを渡して質問詳細画面を起動する
+                        Log.d("NNNNNNN",shopListArrayList[position].commodity)
                         val intent = Intent(context, ShopListAddActivity::class.java)
                         intent.putExtra("inventry", shopListArrayList[position])
                         startActivity(intent)

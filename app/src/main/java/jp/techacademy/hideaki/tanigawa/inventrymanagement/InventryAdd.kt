@@ -91,6 +91,8 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
         // Intentで送られてきた値の取得
         groupKindName = intent.getStringExtra("groupIdKind").toString()
         Log.d("TEST",groupKindName)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     override fun onResume() {
@@ -176,6 +178,11 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
 
                     override fun onCancelled(firebaseError: DatabaseError) {}
                 })
+            }
+            android.R.id.home -> {
+                Log.d("return","戻る")
+                finish()
+                return true
             }
         }
 

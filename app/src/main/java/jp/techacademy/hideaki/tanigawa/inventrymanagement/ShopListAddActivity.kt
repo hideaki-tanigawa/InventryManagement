@@ -45,7 +45,7 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
     private lateinit var databaseReference: DatabaseReference
     private lateinit var inviteRef: DatabaseReference
     private lateinit var shopRef: DatabaseReference
-    private lateinit var inventry: Inventry
+    private lateinit var inventry: ShopInventory
     private var inventryName = ""
     private var moveBoolean: Boolean = false
     private var pictureUri: Uri? = null
@@ -69,9 +69,9 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
         try {
             @Suppress("UNCHECKED_CAST", "DEPRECATION", "DEPRECATED_SYNTAX_WITH_DEFINITELY_NOT_NULL")
             inventry = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                intent.getSerializableExtra("inventry", Inventry::class.java)!!
+                intent.getSerializableExtra("inventry", ShopInventory::class.java)!!
             else
-                (intent.getSerializableExtra("inventry") as? Inventry)!!
+                (intent.getSerializableExtra("inventry") as? ShopInventory)!!
 
             moveBoolean = true
         }catch (e: NullPointerException){
@@ -83,6 +83,8 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
         binding.commodityAddButton.setOnClickListener(this)
         binding.commodityImage.setOnClickListener(this)
         binding.dateButton.setOnClickListener(this)
+
+         Log.d("Test",moveBoolean.toString())
 
         // 在庫作成画面の要素に値を代入する
         if(moveBoolean){
@@ -340,7 +342,7 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
      * 要素を代入する処理
      * @param inventry: 買い物リストの商品情報
      */
-    private fun assignmentValue(inventry: Inventry){
+    private fun assignmentValue(inventry: ShopInventory){
         val bytes = inventry.imageBytes
         if (bytes.isNotEmpty()) {
             val image = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)

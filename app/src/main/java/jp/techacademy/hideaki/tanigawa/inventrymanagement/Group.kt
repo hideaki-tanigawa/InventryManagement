@@ -19,6 +19,7 @@ import com.google.firebase.database.*
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.GroupMainBinding
 import java.util.*
 import android.util.Base64
+import androidx.appcompat.widget.SearchView
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
@@ -35,6 +36,7 @@ class Group:Fragment() {
     private var item: MenuItem? = null
     private var item2: MenuItem? = null
     private var invCount: Int = 0
+    private lateinit var searchInventory: ArrayList<Inventry>
 
     private lateinit var databaseReference: DatabaseReference
     private lateinit var groupArrayList: ArrayList<GroupList>
@@ -233,6 +235,21 @@ class Group:Fragment() {
         groupInventryArrayList = ArrayList()
         invAdapter.setInventryArrayList(groupInventryArrayList)
         invAdapter.notifyDataSetChanged()
+
+        binding.groupInventrySearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
+            android.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                Log.d("確認",query!!)
+                refinedSearch(query!!)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        })
+
+        searchInventory = ArrayList()
     }
 
     override fun onResume() {
@@ -386,5 +403,48 @@ class Group:Fragment() {
         }else{
             binding.noInventoryListText.visibility = View.GONE
         }
+    }
+
+    /**
+     * 在庫リストを絞り込む処理
+     * @param query 検索ワード
+     */
+    private fun refinedSearch(query: String){
+        searchInventory = groupInventryArrayList.clone() as ArrayList<Inventry>
+
+        groupInventryArrayList.clear()
+        // 在庫のリストをクinventryArrayList.clear()
+        invAdapter.setInventryArrayList(groupInventryArrayList)
+        binding.groupListView.adapter = invAdapter
+
+        Log.d("配列数", searchInventory.size.toString())
+        if(searchInventory.size == 1){
+            if(searchInventory[0].commodity.equals(query)){
+                Log.d("在庫名",query)
+                groupInventryArrayList.add(searchInventory[0])
+                invAdapter.notifyDataSetChanged()
+            }else if(searchInventory[0].genre.equals(query)){
+                groupInventryArrayList.add(searchInventory[0])
+                invAdapter.notifyDataSetChanged()
+            }else if(searchInventory[0].place.equals(query)){
+                groupInventryArrayList.add(searchInventory[0])
+                invAdapter.notifyDataSetChanged()
+            }
+        }else{
+            for(count in 0..searchInventory.size - 1){
+                if(searchInventory[count].commodity.equals(query)){
+                    groupInventryArrayList.add(searchInventory[count])
+                    invAdapter.notifyDataSetChanged()
+                }else if(searchInventory[count].genre.equals(query)){
+                    groupInventryArrayList.add(searchInventory[count])
+                    invAdapter.notifyDataSetChanged()
+                }else if(searchInventory[count].place.equals(query)){
+                    groupInventryArrayList.add(searchInventory[count])
+                    invAdapter.notifyDataSetChanged()
+                }
+            }
+        }
+
+//        searchCount++
     }
 }

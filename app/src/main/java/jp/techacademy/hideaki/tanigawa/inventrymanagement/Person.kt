@@ -73,7 +73,7 @@ class Person : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 strQuery = query!!
                 searchCount = 1
-//                refinedSearch(strQuery!!)
+                refinedSearch(strQuery!!)
 //                searchCount = 0
                 return true
             }
@@ -299,8 +299,15 @@ class Person : Fragment() {
 
     /**
      * 在庫リストを絞り込む処理
+     * @param query 検索ワード
      */
     private fun refinedSearch(query: String){
+        searchInventory = inventryArrayList.clone() as ArrayList<Inventry>
+
+        inventryArrayList.clear()
+        // 在庫のリストをクinventryArrayList.clear()
+        adapter.setInventryArrayList(inventryArrayList)
+        binding.listView.adapter = adapter
 
         Log.d("配列数", searchInventory.size.toString())
         if(searchInventory.size == 1){
