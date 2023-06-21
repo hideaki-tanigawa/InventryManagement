@@ -1,6 +1,7 @@
 package jp.techacademy.hideaki.tanigawa.inventrymanagement
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
@@ -9,7 +10,9 @@ import com.google.firebase.auth.FirebaseAuth
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ContentMainBinding
 import android.util.Base64
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat.getSystemService
 import com.google.firebase.database.*
 
 // TODO: Rename parameter arguments, choose names that match
@@ -275,7 +278,9 @@ class Person : Fragment() {
      * Firebaseから在庫データを削除する処理
      */
     private fun deleteInventryListInfo(groupID: String, inventryID:String){
+        val shopRef = databaseReference.child(ShoppingPATH).child(groupID)
         invRef = databaseReference.child(InventriesPATH).child(groupID).child(inventryID)
+        shopRef.removeValue()
         invRef!!.removeValue()
         inventryArrayList.clear()
         adapter.setInventryArrayList(inventryArrayList)
@@ -302,6 +307,10 @@ class Person : Fragment() {
      * @param query 検索ワード
      */
     private fun refinedSearch(query: String){
+        // キーボードが出てたら閉じる
+        val im = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        im.hideSoftInputFromWindow(view?.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS)
+
         searchInventory = inventryArrayList.clone() as ArrayList<Inventry>
 
         inventryArrayList.clear()

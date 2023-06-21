@@ -194,7 +194,7 @@ fun userHaveGroupIdStorage(context: Context){
  * @param groupIdArrayList userが参加しているGroupIDの一覧を格納する配列
  */
 private fun groupIdInventoryCountStorage(groupIdArrayList: ArrayList<String>, context: Context){
-
+    var clearCount = 0
     inventoryCountArrayList.clear()
     inventoryInfoArrayList.clear()
     inventoryIdArrayList.clear()
@@ -213,10 +213,11 @@ private fun groupIdInventoryCountStorage(groupIdArrayList: ArrayList<String>, co
 //                        Log.d("CCCCCCC", groupMap.keys.toString())
                         val groupNameMap = groupMap[groupKey] as Map<*,*>
 //                        Log.d("DDDDDDD", groupNameMap.keys.toString())
-                        val groupName = groupNameMap["groupName"] as? String ?: ""
+                        var groupName = groupNameMap["groupName"] as? String ?: ""
                         for(groupNameKey in groupNameMap.keys){
                             if(!groupName.equals("")){
                                 inventoryInfoArrayList.add(groupName)
+                                groupName = ""
                             }else if(!groupNameKey.toString().equals("member") && groupName.equals("")){
                                 inventoryInfoArrayList.add("個人")
                             }
@@ -227,7 +228,10 @@ private fun groupIdInventoryCountStorage(groupIdArrayList: ArrayList<String>, co
                                 inventoryInfoArrayList.add(invMap["commodity"].toString())
                                 inventoryInfoArrayList.add(invMap["count"].toString())
                                 inventoryInfoArrayList.add(invMap["notice"].toString())
-                                notificationChoice(inventoryInfoArrayList, context)
+                                 clearCount = notificationChoice(inventoryInfoArrayList, context)
+                            }
+                            if(clearCount == 0){
+                                inventoryInfoArrayList.clear()
                             }
 //                            Log.d("TTTTTTTT", groupNameKey.toString())
                         }
@@ -242,7 +246,7 @@ private fun groupIdInventoryCountStorage(groupIdArrayList: ArrayList<String>, co
 /**
  * @param invInfoArrayList
  */
-private fun notificationChoice(invInfoArrayList: ArrayList<String>, context: Context) {
+private fun notificationChoice(invInfoArrayList: ArrayList<String>, context: Context): Int {
     for(count in 0..invInfoArrayList.size - 1){
         Log.d("これっていける",invInfoArrayList[count])
     }
@@ -256,6 +260,7 @@ private fun notificationChoice(invInfoArrayList: ArrayList<String>, context: Con
         countThreeNotificationChannel(context, invInfoArrayList[1])
     }
     inventoryInfoArrayList.clear()
+    return 1
 }
 
 /**
@@ -270,17 +275,20 @@ fun userEachGroupIdSendIdStorage(context: Context){
     val sendGroupIdRef = databaseReference.child(InvitePATH)
     sendGroupIdRef.addListenerForSingleValueEvent(object : ValueEventListener{
         override fun onDataChange(snapshot: DataSnapshot) {
-            val infoMap = snapshot.value as Map<*,*>
-            try {
-                val sendGroupIdMap = infoMap[userID] as Map<*,*>
-                for(index in sendGroupIdMap.keys){
-                    Log.d("sendInfo",index.toString())
-                    Log.d("groupInfo",sendGroupIdMap[index].toString())
-                    inviteGroupIdArrayList.add(index.toString())
-                    inviteSendIdArrayList.add(sendGroupIdMap[index].toString())
-                }
-                groupIdEachGroupName(context, inviteGroupIdArrayList, inviteSendIdArrayList)
-            }catch (e: java.lang.NullPointerException){}
+            if(snapshot.value != null){
+                val infoMap = snapshot.value as Map<*,*>
+
+                try {
+                    val sendGroupIdMap = infoMap[userID] as Map<*,*>
+                    for(index in sendGroupIdMap.keys){
+                        Log.d("sendInfo",index.toString())
+                        Log.d("groupInfo",sendGroupIdMap[index].toString())
+                        inviteGroupIdArrayList.add(index.toString())
+                        inviteSendIdArrayList.add(sendGroupIdMap[index].toString())
+                    }
+                    groupIdEachGroupName(context, inviteGroupIdArrayList, inviteSendIdArrayList)
+                }catch (e: java.lang.NullPointerException){}
+            }
         }
         override fun onCancelled(error: DatabaseError) {}
 

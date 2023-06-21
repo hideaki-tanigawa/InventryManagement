@@ -74,12 +74,13 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
                 (intent.getSerializableExtra("inventry") as? ShopInventory)!!
 
             moveBoolean = true
+            title = getString(R.string.shop_send_edit_title)
         }catch (e: NullPointerException){
             moveBoolean = false
+            // UIの準備
+            title = getString(R.string.shop_send_title)
         }
 
-        // UIの準備
-        title = "買い物リスト作成"
         binding.commodityAddButton.setOnClickListener(this)
         binding.commodityImage.setOnClickListener(this)
         binding.dateButton.setOnClickListener(this)
@@ -219,6 +220,27 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
             val notice = noticeId
             val date = binding.commodityDateText.text.toString()
             val groupId = userHaveGroupMap[groupNameSpinnerValue]
+
+            Log.d("スピナー確認",groupNameSpinnerValue)
+            Log.d("スピナー確認", userHaveGroupMap[groupNameSpinnerValue].toString())
+
+            if(date.equals(getString(R.string.add_commodity_date))){
+                // 日付が入力されていない時はエラーを表示する
+                Snackbar.make(binding.commodityAddButton, getString(R.string.date_message), Snackbar.LENGTH_LONG).show()
+                return
+            }
+
+            if (title.isEmpty()) {
+                // タイトルが入力されていない時はエラーを表示するだけ
+                Snackbar.make(binding.commodityAddButton, getString(R.string.input_title), Snackbar.LENGTH_LONG).show()
+                return
+            }
+
+            if (price.isEmpty()) {
+                // 質問が入力されていない時はエラーを表示するだけ
+                Snackbar.make(binding.commodityAddButton, getString(R.string.price_message), Snackbar.LENGTH_LONG).show()
+                return
+            }
 
             data["uid"] = userId
             data["commodity"] = title

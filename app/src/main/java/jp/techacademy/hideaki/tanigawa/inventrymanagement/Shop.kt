@@ -1,6 +1,7 @@
 package jp.techacademy.hideaki.tanigawa.inventrymanagement
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Base64
@@ -8,6 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
@@ -143,6 +145,7 @@ class Shop:Fragment() {
                     val uid = invMap["uid"] as? String ?: ""
                     val date = invMap["date"] as? String ?: ""
                     val addCount = invMap["count"] as? String ?: ""
+                    val addPrice = invMap["price"] as? String ?: ""
                     val genre = invMap["genre"] as? String ?: ""
                     val notice = invMap["notice"] as? String ?: ""
                     val place = invMap["place"] as? String ?: ""
@@ -155,17 +158,19 @@ class Shop:Fragment() {
                         }
                     val inventry = ShopInventory(
                         commodity, price, count, uid, inventryId,
-                        genre, place, date, notice, groupId, addCount, bytes
+                        genre, place, date, notice, groupId, addCount, addPrice, bytes
                     )
                     if(!price.equals("")){
                         val mathPrice = price.toInt()
                         shopListPrice += mathPrice
 
-                        binding.inventryAllPriceText.setText("合計金額："+shopListPrice+"円")
+                        binding.inventryAllPriceText.setText("合計金額："+shopListPrice+" 円")
 
                         roopCount++
                         shopListArrayList.add(inventry)
                         adapter.notifyDataSetChanged()
+                    }else{
+                        binding.inventryAllPriceText.setText("合計金額：----- 円")
                     }
 
                     binding.shopListView.setOnItemClickListener{parent, _, position, _ ->
@@ -187,7 +192,7 @@ class Shop:Fragment() {
                         builder.setTitle("在庫登録 or 削除")
                         builder.setMessage(commodity + "を登録 or 削除しますか")
                         builder.setPositiveButton("削除") {_, _ ->
-                            deleteInventryListInfo(groupId)
+                            deleteInventryListInfo(groupId, inventry)
                         }
 
                         builder.setNegativeButton("登録"){_, _ ->
@@ -217,10 +222,27 @@ class Shop:Fragment() {
     /**
      * Firebaseから在庫データを削除する処理
      */
-    private fun deleteInventryListInfo(groupID: String){
-        invRef = databaseReference.child(ShoppingPATH).child(groupID)
-        invRef!!.removeValue()
-        onResume()
+    private fun deleteInventryListInfo(groupID: String, inventry: ShopInventory){
+        invRef = databaseReference.child(InventriesPATH).child(groupID).child(inventry.inventryUid)
+        shopRef = databaseReference.child(ShoppingPATH).child(groupID)
+        invRef.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val map = snapshot.value as Map<*,*>
+                val shopBoolean = map["shopBoolean"] as? String ?: ""
+                if(shopBoolean.equals("1")){
+                    Log.d("在庫情報確認",map["date"].toString())
+                    // リスト更新
+                    invRef.removeValue()
+                    shopRef.removeValue()
+                    onResume()
+                }else{
+                    shopRef.removeValue()
+                    onResume()
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {}
+
+        })
     }
 
     private fun registerInventryListInfo(groupID: String, inventry: ShopInventory){
@@ -228,17 +250,22 @@ class Shop:Fragment() {
         shopRef = databaseReference.child(ShoppingPATH).child(groupID)
         invRef = databaseReference.child(InventriesPATH).child(groupID).child(inventry.inventryUid)
 
+        var addPrice = inventry.addPrice
+        var pulsPrice = 0
         var addCount = inventry.addCount
         var pulsCount = 0
         if(addCount != null){
             pulsCount = addCount.toInt() + inventry.count.toInt()
+        }
+        if(pulsCount != null){
+            pulsPrice = addPrice.toInt() + inventry.price.toInt()
         }
 
         shopRef.removeValue()
 
         val map = HashMap<String,Any>()
         map["count"] = pulsCount
-        map["price"] = inventry.price
+        map["price"] = pulsPrice
         map["shopBoolean"] = "0"
 
         invRef.updateChildren(map).addOnSuccessListener {
@@ -264,6 +291,10 @@ class Shop:Fragment() {
      * @param query 検索ワード
      */
     private fun refinedSearch(query: String){
+        // キーボードが出てたら閉じる
+        val im = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        im.hideSoftInputFromWindow(view?.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS)
+
         searchInventory = shopListArrayList.clone() as ArrayList<ShopInventory>
 
         shopListArrayList.clear()

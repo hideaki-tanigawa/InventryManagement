@@ -371,6 +371,28 @@ class Group:Fragment() {
                         startActivity(intent)
                     }catch (e: java.lang.IndexOutOfBoundsException){}
                 }
+                binding.groupListView.setOnItemLongClickListener { parent, _, position, _ ->
+                    val groupId = groupInventryArrayList[position].groupId
+                    val inventoryUid = groupInventryArrayList[position].inventryUid
+                    // ダイアログを表示する
+                    val builder = AlertDialog.Builder(context)
+
+                    builder.setTitle("削除")
+                    builder.setMessage(commodity + "を削除しますか")
+                    builder.setPositiveButton("削除") {_,_ ->
+                        val invRef = databaseReference.child(InventriesPATH).child(groupId).child(inventoryUid)
+                        invRef.removeValue()
+
+                        // リスト更新
+                        groupInventoryUpdate()
+                    }
+
+                    builder.setNegativeButton("キャンセル", null)
+
+                    val dialog = builder.create()
+                    dialog.show()
+                    true
+                }
             }
         }
         override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
@@ -446,5 +468,16 @@ class Group:Fragment() {
         }
 
 //        searchCount++
+    }
+
+    /**
+     * 在庫一覧(グループ)の更新処理
+     */
+    private fun groupInventoryUpdate(){
+        groupInventryListRef = databaseReference.child(InventriesPATH).child(groupId)
+        groupInventryArrayList.clear()
+        invAdapter.setInventryArrayList(groupInventryArrayList)
+        binding.groupListView.adapter = invAdapter
+        groupInventryListRef.addChildEventListener(groupInventryeventListener)
     }
 }

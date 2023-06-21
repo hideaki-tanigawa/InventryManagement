@@ -73,12 +73,13 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
                 (intent.getSerializableExtra("inventry") as? Inventry)!!
 
             moveBoolean = true
+            title = getString(R.string.inventry_send_edit_title)
         }catch (e: NullPointerException){
             moveBoolean = false
+            // UIの準備
+            title = getString(R.string.inventry_send_title)
         }
 
-        // UIの準備
-        title = getString(R.string.inventry_send_title)
         binding.commodityAddButton.setOnClickListener(this)
         binding.commodityImage.setOnClickListener(this)
         binding.dateButton.setOnClickListener(this)
@@ -268,6 +269,7 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
             val userID = FirebaseAuth.getInstance().currentUser!!.uid
             val userRef = dataBaseReference.child(UsersPATH).child(userID)
             userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                @RequiresApi(Build.VERSION_CODES.O)
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val data = snapshot.value as Map<*, *>?
                     val data2 = data!!["groupID"] as Map<*,*>
@@ -383,6 +385,12 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
         val place = binding.commodityPlaceEdit.text.toString()
         val notice = noticeId
         val date = binding.commodityDateText.text.toString()
+
+        if(date.equals(getString(R.string.add_commodity_date))){
+            // 日付が入力されていない時はエラーを表示する
+            Snackbar.make(binding.commodityAddButton, getString(R.string.date_message), Snackbar.LENGTH_LONG).show()
+            return
+        }
 
         if (title.isEmpty()) {
             // タイトルが入力されていない時はエラーを表示するだけ

@@ -46,8 +46,16 @@ class GroupListAdapter(context: Context) : BaseAdapter() {
             ListGroupBinding.bind(convertView)
         }
         val view: View = convertView ?: binding.root
+        val maxCharacters = 14
+        val groupName = groupListArrayList[position].groupName
 
-        binding.groupNameText.text = groupListArrayList[position].groupName
+        if (groupName.length > maxCharacters){
+            val truncatedText = groupName.substring(0, maxCharacters) + "..." // 制限を超えた場合に「...」を追加
+            binding.groupNameText.text = truncatedText
+        }else{
+            binding.groupNameText.text = groupName
+        }
+
         binding.groupMemberCount.text = groupListArrayList[position].groups.toString()
 
         return view

@@ -50,6 +50,7 @@ class InventryListAdapter(context: Context) : BaseAdapter() {
         }
         val view: View = convertView ?: binding.root
 
+        val maxCharacters = 16
         val groupId = inventryArrayList[position].groupId
         val commodity = inventryArrayList[position].commodity
         val genre = inventryArrayList[position].genre
@@ -59,12 +60,17 @@ class InventryListAdapter(context: Context) : BaseAdapter() {
         Log.d("COUNT",count)
         var invCount = count.toInt()
 
-        binding.inventryTitleText.text = commodity
+        if(commodity.length > 16){
+            val truncatedText = commodity.substring(0, maxCharacters) + "..." // 制限を超えた場合に「...」を追加
+            binding.inventryTitleText.text = truncatedText
+        }else{
+            binding.inventryTitleText.text = commodity
+        }
 
         val date1 = LocalDate.now()
         val invDate = inventryArrayList[position].date.split("/")
         val date2 = LocalDate.of(invDate[0].toInt(),invDate[1].toInt(),invDate[2].toInt())
-        val increment = ChronoUnit.DAYS.between(date1,date2)
+        var increment = ChronoUnit.DAYS.between(date1,date2)
         var dateIncrement = ""
 
         if (increment.toInt() == 0 || invCount == 0){
@@ -76,10 +82,9 @@ class InventryListAdapter(context: Context) : BaseAdapter() {
                 countEachNotificationChannel(context, commodity, count)
             }
 
-            Log.d("確認あああ",invCount.toString())
-
             if(invCount > 0){
                 dateIncrement = dateDiff(groupId,commodity,genre,invetoryId,date2,invCount)
+                increment = dateIncrement.toLong()
                 binding.consumptionUnitText.text = dateIncrement
                 binding.inventryCountText.text = invCount.toString()
             }else{
@@ -91,8 +96,12 @@ class InventryListAdapter(context: Context) : BaseAdapter() {
             binding.consumptionUnitText.text = increment.toString()
             binding.inventryCountText.text = count
         }
-        if(increment <= 5 || invCount == 0){
+        if(increment.toInt() == 0 || invCount == 0){
+            binding.inventryCountText.setTextColor(Color.parseColor("#FF0000"))
             binding.consumptionUnitText.setTextColor(Color.parseColor("#FF0000"))
+        }else{
+            binding.inventryCountText.setTextColor(Color.parseColor("#808080"))
+            binding.consumptionUnitText.setTextColor(Color.parseColor("#808080"))
         }
 
         val bytes = inventryArrayList[position].imageBytes
