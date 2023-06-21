@@ -268,6 +268,7 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
             val userID = FirebaseAuth.getInstance().currentUser!!.uid
             val userRef = dataBaseReference.child(UsersPATH).child(userID)
             userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                @RequiresApi(Build.VERSION_CODES.O)
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val data = snapshot.value as Map<*, *>?
                     val data2 = data!!["groupID"] as Map<*,*>
