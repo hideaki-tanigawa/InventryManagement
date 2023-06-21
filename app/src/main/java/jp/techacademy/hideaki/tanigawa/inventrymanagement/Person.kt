@@ -278,7 +278,9 @@ class Person : Fragment() {
      * Firebaseから在庫データを削除する処理
      */
     private fun deleteInventryListInfo(groupID: String, inventryID:String){
+        val shopRef = databaseReference.child(ShoppingPATH).child(groupID)
         invRef = databaseReference.child(InventriesPATH).child(groupID).child(inventryID)
+        shopRef.removeValue()
         invRef!!.removeValue()
         inventryArrayList.clear()
         adapter.setInventryArrayList(inventryArrayList)
