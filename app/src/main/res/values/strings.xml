@@ -52,6 +52,7 @@
     <string name="inventry_send_title">在庫作成</string>
     <string name="input_title">商品名を入力してください</string>
     <string name="price_message">価格を入力してください</string>
+    <string name="date_message">日付を入力してください</string>
     <string name="get_image">画像を取得</string>
     <string name="inventry_no_select_screen">画面が指定されておりません</string>
     <string name="inventry_send_error_message">在庫を作成できませんでした</string>

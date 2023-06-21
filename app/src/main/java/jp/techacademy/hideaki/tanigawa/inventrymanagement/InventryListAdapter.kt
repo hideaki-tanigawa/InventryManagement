@@ -50,6 +50,7 @@ class InventryListAdapter(context: Context) : BaseAdapter() {
         }
         val view: View = convertView ?: binding.root
 
+//        val maxCharacters =
         val groupId = inventryArrayList[position].groupId
         val commodity = inventryArrayList[position].commodity
         val genre = inventryArrayList[position].genre

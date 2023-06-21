@@ -385,6 +385,12 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
         val notice = noticeId
         val date = binding.commodityDateText.text.toString()
 
+        if(date.equals(getString(R.string.add_commodity_date))){
+            // 日付が入力されていない時はエラーを表示する
+            Snackbar.make(binding.commodityAddButton, getString(R.string.date_message), Snackbar.LENGTH_LONG).show()
+            return
+        }
+
         if (title.isEmpty()) {
             // タイトルが入力されていない時はエラーを表示するだけ
             Snackbar.make(binding.commodityAddButton, getString(R.string.input_title), Snackbar.LENGTH_LONG).show()
