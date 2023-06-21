@@ -84,22 +84,34 @@ class LoginActivity : AppCompatActivity() {
 
                     // 表示名をPreferenceに保存する
                     saveName(name)
+
+                    // プログレスバーを非表示にする
+                    binding.progressBar.visibility = View.GONE
+
+                    // Activityを閉じる
+                    finish()
                 } else {
                     userRef.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             val data = snapshot.value as Map<*, *>?
                             saveName(data!!["name"] as String)
+
+                            // プログレスバーを非表示にする
+                            binding.progressBar.visibility = View.GONE
+
+                            // Activityを閉じる
+                            this@LoginActivity.finish()
                         }
 
-                        override fun onCancelled(firebaseError: DatabaseError) {}
+                        override fun onCancelled(firebaseError: DatabaseError) {
+                            // プログレスバーを非表示にする
+                            binding.progressBar.visibility = View.GONE
+
+                            // Activityを閉じる
+                            finish()
+                        }
                     })
                 }
-
-                // プログレスバーを非表示にする
-                binding.progressBar.visibility = View.GONE
-
-                // Activityを閉じる
-                finish()
 
             } else {
                 // 失敗した場合

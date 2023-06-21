@@ -1,9 +1,13 @@
 package jp.techacademy.hideaki.tanigawa.inventrymanagement
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import androidx.appcompat.widget.SearchView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import jp.techacademy.hideaki.tanigawa.inventrymanagement.databinding.ActivityNoticeListBinding
@@ -16,7 +20,9 @@ class NoticeListActivity : AppCompatActivity() {
     private lateinit var groupRef: DatabaseReference
     private lateinit var databaseReference: DatabaseReference
     private lateinit var noticeArrayList: ArrayList<NoticeList>
+    private lateinit var searchInventory: ArrayList<NoticeList>
     private lateinit var adapter: NoticeListAdapter
+    private var strQuery: String = ""
 
     /**
      * グループ招待をしてくれたグループ名と送信者のリストを表示する処理
@@ -59,6 +65,21 @@ class NoticeListActivity : AppCompatActivity() {
         noticeArrayList = ArrayList()
         adapter.setNoticeListArrayList(noticeArrayList)
         adapter.notifyDataSetChanged()
+
+        binding.groupInventrySearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
+            android.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                strQuery = query!!
+                refinedSearch(strQuery)
+                return true
+            }
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+
+        })
+
+        searchInventory = ArrayList()
     }
 
     public override fun onResume() {
@@ -144,5 +165,42 @@ class NoticeListActivity : AppCompatActivity() {
             override fun onCancelled(error: DatabaseError) {}
 
         })
+    }
+
+    /**
+     * グループ招待通知リストを絞り込む処理
+     * @param query 検索ワード
+     */
+    private fun refinedSearch(query: String){
+        searchInventory = noticeArrayList.clone() as ArrayList<NoticeList>
+
+        noticeArrayList.clear()
+        // 在庫のリストをクinventryArrayList.clear()
+        adapter.setNoticeListArrayList(noticeArrayList)
+        binding.noticeListView.adapter = adapter
+
+        Log.d("配列数", searchInventory.size.toString())
+        if(searchInventory.size == 1){
+            if(searchInventory[0].groupName.equals(query)){
+                Log.d("在庫名",query)
+                noticeArrayList.add(searchInventory[0])
+                adapter.notifyDataSetChanged()
+            }else if(searchInventory[0].sendUserName.equals(query)){
+                noticeArrayList.add(searchInventory[0])
+                adapter.notifyDataSetChanged()
+            }
+        }else{
+            for(count in 0..searchInventory.size - 1){
+                if(searchInventory[count].groupName.equals(query)){
+                    noticeArrayList.add(searchInventory[count])
+                    adapter.notifyDataSetChanged()
+                }else if(searchInventory[count].sendUserName.equals(query)){
+                    noticeArrayList.add(searchInventory[count])
+                    adapter.notifyDataSetChanged()
+                }
+            }
+        }
+
+//        searchCount++
     }
 }
