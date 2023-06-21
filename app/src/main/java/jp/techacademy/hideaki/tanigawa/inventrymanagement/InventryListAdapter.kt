@@ -50,7 +50,7 @@ class InventryListAdapter(context: Context) : BaseAdapter() {
         }
         val view: View = convertView ?: binding.root
 
-//        val maxCharacters =
+        val maxCharacters = 16
         val groupId = inventryArrayList[position].groupId
         val commodity = inventryArrayList[position].commodity
         val genre = inventryArrayList[position].genre
@@ -60,7 +60,12 @@ class InventryListAdapter(context: Context) : BaseAdapter() {
         Log.d("COUNT",count)
         var invCount = count.toInt()
 
-        binding.inventryTitleText.text = commodity
+        if(commodity.length > 16){
+            val truncatedText = commodity.substring(0, maxCharacters) + "..." // 制限を超えた場合に「...」を追加
+            binding.inventryTitleText.text = truncatedText
+        }else{
+            binding.inventryTitleText.text = commodity
+        }
 
         val date1 = LocalDate.now()
         val invDate = inventryArrayList[position].date.split("/")
