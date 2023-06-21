@@ -47,7 +47,7 @@ class UserSettingActivity : AppCompatActivity() {
                 val userRef = databaseReference.child(UsersPATH).child(user.uid)
                 val data = HashMap<String, Any>()
                 data["name"] = name2
-                
+
                 // 名前の値だけをDBに変更をかける
                 userRef.updateChildren(data).addOnSuccessListener {
                     // 変更した表示名をPreferenceに保存する
@@ -62,6 +62,9 @@ class UserSettingActivity : AppCompatActivity() {
             }
         }
 
+        /**
+         * ログアウトボタンが押下した際、ログアウトする処理
+         */
         binding.logoutButton.setOnClickListener { v ->
             FirebaseAuth.getInstance().signOut()
             binding.userNameText.setText("")
