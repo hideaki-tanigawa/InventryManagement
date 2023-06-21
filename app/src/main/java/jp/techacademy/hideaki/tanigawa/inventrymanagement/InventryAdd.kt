@@ -73,12 +73,13 @@ class InventryAdd : AppCompatActivity(), View.OnClickListener,
                 (intent.getSerializableExtra("inventry") as? Inventry)!!
 
             moveBoolean = true
+            title = getString(R.string.inventry_send_edit_title)
         }catch (e: NullPointerException){
             moveBoolean = false
+            // UIの準備
+            title = getString(R.string.inventry_send_title)
         }
 
-        // UIの準備
-        title = getString(R.string.inventry_send_title)
         binding.commodityAddButton.setOnClickListener(this)
         binding.commodityImage.setOnClickListener(this)
         binding.dateButton.setOnClickListener(this)

@@ -1,6 +1,7 @@
 package jp.techacademy.hideaki.tanigawa.inventrymanagement
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Base64
@@ -8,6 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
@@ -264,6 +266,10 @@ class Shop:Fragment() {
      * @param query 検索ワード
      */
     private fun refinedSearch(query: String){
+        // キーボードが出てたら閉じる
+        val im = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        im.hideSoftInputFromWindow(view?.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS)
+        
         searchInventory = shopListArrayList.clone() as ArrayList<ShopInventory>
 
         shopListArrayList.clear()

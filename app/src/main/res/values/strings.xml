@@ -50,6 +50,7 @@
     <string name="add_commodity_place_case">例：冷蔵庫、洗面台</string>
     <string name="send_button_label">保存</string>
     <string name="inventry_send_title">在庫作成</string>
+    <string name="inventry_send_edit_title">在庫編集</string>
     <string name="input_title">商品名を入力してください</string>
     <string name="price_message">価格を入力してください</string>
     <string name="date_message">日付を入力してください</string>
@@ -76,4 +77,7 @@
     <string name="notice_list_member_name">ユーザー名</string>
     <string name="notice_list_participation_button">参加</string>
     <string name="notice_list_refusal_button">拒否</string>
+    <!-- 買い物リスト画面用の文字列 -->
+    <string name="shop_send_title">買い物リスト作成</string>
+    <string name="shop_send_edit_title">買い物リスト編集</string>
 </resources>
