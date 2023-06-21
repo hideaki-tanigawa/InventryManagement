@@ -270,17 +270,20 @@ fun userEachGroupIdSendIdStorage(context: Context){
     val sendGroupIdRef = databaseReference.child(InvitePATH)
     sendGroupIdRef.addListenerForSingleValueEvent(object : ValueEventListener{
         override fun onDataChange(snapshot: DataSnapshot) {
-            val infoMap = snapshot.value as Map<*,*>
-            try {
-                val sendGroupIdMap = infoMap[userID] as Map<*,*>
-                for(index in sendGroupIdMap.keys){
-                    Log.d("sendInfo",index.toString())
-                    Log.d("groupInfo",sendGroupIdMap[index].toString())
-                    inviteGroupIdArrayList.add(index.toString())
-                    inviteSendIdArrayList.add(sendGroupIdMap[index].toString())
-                }
-                groupIdEachGroupName(context, inviteGroupIdArrayList, inviteSendIdArrayList)
-            }catch (e: java.lang.NullPointerException){}
+            if(snapshot.value != null){
+                val infoMap = snapshot.value as Map<*,*>
+
+                try {
+                    val sendGroupIdMap = infoMap[userID] as Map<*,*>
+                    for(index in sendGroupIdMap.keys){
+                        Log.d("sendInfo",index.toString())
+                        Log.d("groupInfo",sendGroupIdMap[index].toString())
+                        inviteGroupIdArrayList.add(index.toString())
+                        inviteSendIdArrayList.add(sendGroupIdMap[index].toString())
+                    }
+                    groupIdEachGroupName(context, inviteGroupIdArrayList, inviteSendIdArrayList)
+                }catch (e: java.lang.NullPointerException){}
+            }
         }
         override fun onCancelled(error: DatabaseError) {}
 

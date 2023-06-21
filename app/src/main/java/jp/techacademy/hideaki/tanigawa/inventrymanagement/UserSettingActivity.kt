@@ -45,18 +45,18 @@ class UserSettingActivity : AppCompatActivity() {
                 // 変更した表示名をFirebaseに保存する
                 val name2 = binding.userNameText.text.toString()
                 val userRef = databaseReference.child(UsersPATH).child(user.uid)
-                val data = HashMap<String, String>()
+                val data = HashMap<String, Any>()
                 data["name"] = name2
-                userRef.setValue(data)
+                userRef.updateChildren(data).addOnSuccessListener {
+                    // 変更した表示名をPreferenceに保存する
+                    val sp2 = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+                    val editor = sp2.edit()
+                    editor.putString(NameKEY, name2)
+                    editor.apply()
 
-                // 変更した表示名をPreferenceに保存する
-                val sp2 = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-                val editor = sp2.edit()
-                editor.putString(NameKEY, name2)
-                editor.apply()
-
-                Snackbar.make(v, getString(R.string.change_display_name), Snackbar.LENGTH_LONG)
-                    .show()
+                    Snackbar.make(v, getString(R.string.change_display_name), Snackbar.LENGTH_LONG)
+                        .show()
+                }
             }
         }
 
