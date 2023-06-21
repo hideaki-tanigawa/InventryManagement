@@ -221,6 +221,9 @@ class ShopListAddActivity : AppCompatActivity(), View.OnClickListener,
             val date = binding.commodityDateText.text.toString()
             val groupId = userHaveGroupMap[groupNameSpinnerValue]
 
+            Log.d("スピナー確認",groupNameSpinnerValue)
+            Log.d("スピナー確認", userHaveGroupMap[groupNameSpinnerValue].toString())
+
             if(date.equals(getString(R.string.add_commodity_date))){
                 // 日付が入力されていない時はエラーを表示する
                 Snackbar.make(binding.commodityAddButton, getString(R.string.date_message), Snackbar.LENGTH_LONG).show()

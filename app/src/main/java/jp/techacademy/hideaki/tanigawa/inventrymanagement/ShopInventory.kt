@@ -14,6 +14,7 @@ class ShopInventory(
     val notice: String,
     val groupId: String,
     val addCount: String,
+    val addPrice: String,
     bytes: ByteArray,
 ) : Serializable {
     val imageBytes: ByteArray

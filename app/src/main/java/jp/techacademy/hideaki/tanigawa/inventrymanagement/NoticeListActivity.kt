@@ -23,6 +23,7 @@ class NoticeListActivity : AppCompatActivity() {
     private lateinit var searchInventory: ArrayList<NoticeList>
     private lateinit var adapter: NoticeListAdapter
     private var strQuery: String = ""
+    private var invCount: Int = 0
 
     /**
      * グループ招待をしてくれたグループ名と送信者のリストを表示する処理
@@ -31,6 +32,9 @@ class NoticeListActivity : AppCompatActivity() {
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
             val sendId = snapshot.value as? String ?: ""
             val groupId = snapshot.key.toString()
+
+            invCount = 1
+            displayTextView(invCount)
 
             databaseReference = FirebaseDatabase.getInstance().reference
             userRef = databaseReference.child(UsersPATH).child(sendId)
@@ -202,5 +206,18 @@ class NoticeListActivity : AppCompatActivity() {
         }
 
 //        searchCount++
+    }
+
+    /**
+     * グループ招待されているかによってTextViewを表示させるか
+     * 判断する処理
+     * @param invCount 在庫数
+     */
+    private fun displayTextView(invCount: Int){
+        if(invCount == 0){
+            binding.noNoticeListText.visibility = View.VISIBLE
+        }else{
+            binding.noNoticeListText.visibility = View.GONE
+        }
     }
 }
