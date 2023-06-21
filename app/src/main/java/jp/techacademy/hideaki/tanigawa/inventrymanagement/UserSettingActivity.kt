@@ -47,6 +47,8 @@ class UserSettingActivity : AppCompatActivity() {
                 val userRef = databaseReference.child(UsersPATH).child(user.uid)
                 val data = HashMap<String, Any>()
                 data["name"] = name2
+                
+                // 名前の値だけをDBに変更をかける
                 userRef.updateChildren(data).addOnSuccessListener {
                     // 変更した表示名をPreferenceに保存する
                     val sp2 = PreferenceManager.getDefaultSharedPreferences(applicationContext)
