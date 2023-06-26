@@ -21,6 +21,7 @@ private var inventoryInfoArrayList = ArrayList<String>()
 private var inventoryIdArrayList = ArrayList<String>()
 private var inviteGroupIdArrayList = ArrayList<String>()
 private var inviteSendIdArrayList = ArrayList<String>()
+private var forCheck = 0
 
 /**
  * 在庫数が減る毎に通知する処理
@@ -215,23 +216,27 @@ private fun groupIdInventoryCountStorage(groupIdArrayList: ArrayList<String>, co
 //                        Log.d("DDDDDDD", groupNameMap.keys.toString())
                         var groupName = groupNameMap["groupName"] as? String ?: ""
                         for(groupNameKey in groupNameMap.keys){
-                            if(!groupName.equals("")){
-                                inventoryInfoArrayList.add(groupName)
-                                groupName = ""
-                            }else if(!groupNameKey.toString().equals("member") && groupName.equals("")){
+                            if(!groupNameKey.toString().equals("member") && groupName.equals("")){
                                 inventoryInfoArrayList.add("個人")
                             }
-
+                            if(!groupName.equals("") && forCheck == 0){
+                                inventoryInfoArrayList.add(groupName)
+                                forCheck = 1
+                            }
                             if(!groupNameKey.toString().equals("member") && !groupNameKey.toString().equals("groupName")){
                                 inventoryIdArrayList.add(groupNameKey.toString())
                                 val invMap = groupNameMap[groupNameKey] as Map<*,*>
                                 inventoryInfoArrayList.add(invMap["commodity"].toString())
                                 inventoryInfoArrayList.add(invMap["count"].toString())
                                 inventoryInfoArrayList.add(invMap["notice"].toString())
-                                 clearCount = notificationChoice(inventoryInfoArrayList, context)
+                                clearCount = notificationChoice(inventoryInfoArrayList, context)
+                                groupName = ""
+                                forCheck = 0
                             }
                             if(clearCount == 0){
                                 inventoryInfoArrayList.clear()
+                                groupName = ""
+                                forCheck = 0
                             }
 //                            Log.d("TTTTTTTT", groupNameKey.toString())
                         }
@@ -250,16 +255,16 @@ private fun notificationChoice(invInfoArrayList: ArrayList<String>, context: Con
     for(count in 0..invInfoArrayList.size - 1){
         Log.d("これっていける",invInfoArrayList[count])
     }
-    val count = invInfoArrayList[2].toInt()
-
-    if(invInfoArrayList[3].equals("2") && count == 2){
-        countTwoNotificationChannel(context, invInfoArrayList[1])
-    }else if (invInfoArrayList[3].equals("1") && count == 1){
-        countOneNotificationChannel(context, invInfoArrayList[1])
-    }else if (invInfoArrayList[3].equals("3") && count == 3){
-        countThreeNotificationChannel(context, invInfoArrayList[1])
-    }
-    inventoryInfoArrayList.clear()
+//    val count = invInfoArrayList[2].toInt()
+//
+//    if(invInfoArrayList[3].equals("2") && count == 2){
+//        countTwoNotificationChannel(context, invInfoArrayList[1])
+//    }else if (invInfoArrayList[3].equals("1") && count == 1){
+//        countOneNotificationChannel(context, invInfoArrayList[1])
+//    }else if (invInfoArrayList[3].equals("3") && count == 3){
+//        countThreeNotificationChannel(context, invInfoArrayList[1])
+//    }
+//    inventoryInfoArrayList.clear()
     return 1
 }
 
@@ -376,4 +381,4 @@ private fun noticeListNoticeChoice(
     }
 }
 
-
+// QjRkaXftS5YTTSGKLuh2EfXstx02
