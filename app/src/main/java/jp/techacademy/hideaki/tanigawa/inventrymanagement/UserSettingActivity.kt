@@ -15,6 +15,8 @@ class UserSettingActivity : AppCompatActivity() {
 
     private lateinit var databaseReference: DatabaseReference
 
+    private var userId: String? = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUserSettingBinding.inflate(layoutInflater)
@@ -26,6 +28,13 @@ class UserSettingActivity : AppCompatActivity() {
         binding.userNameText.setText(name)
 
         databaseReference = FirebaseDatabase.getInstance().reference
+        userId = FirebaseAuth.getInstance().currentUser?.let {
+            it.uid
+        }
+
+        if(!userId.equals("")){
+            binding.userIdText.text = "ID：$userId"
+        }
 
         // UIの初期設定
         title = getString(R.string.settings_title)

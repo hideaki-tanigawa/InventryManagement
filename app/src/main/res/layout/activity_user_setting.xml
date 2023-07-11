@@ -10,6 +10,14 @@
     android:paddingBottom="16dp"
     tools:context=".UserSettingActivity">
 
+    <TextView
+        android:id="@+id/userIdText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ユーザーID"
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp"/>
+
     <EditText
         android:id="@+id/userNameText"
         android:layout_width="match_parent"
